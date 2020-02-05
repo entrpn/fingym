@@ -1,0 +1,154 @@
+import os
+import pandas as pd
+import numpy as np
+import sys
+from datetime import datetime
+import re
+
+from .env import Env
+from gym.spaces.space import BuyHoldSellSpace
+
+class SpyEnv(Env):
+    def __init__(self):
+
+        self.headers, self.data = self._load_data()
+        self.n_step = len(self.data)
+        self.cur_step = 0
+        self.initial_investment = 25000
+        self.cash_in_hand = self.initial_investment
+        self._close_idx = 4
+        self._open_idx = 1
+        self.stock_owned = 0
+
+        # stock_owned, cash_in_hand, date, hclo, volume
+        self.state_dim = 2 + len(self.headers)
+
+        # action[0]
+        # 0 - hold/do nothing
+        # 1 - buy
+        # 2 - hold
+        # action[1]
+        # Number of actions to buy/sell
+        self.action_size = 2
+        self.action_space = BuyHoldSellSpace()
+    
+    def reset(self):
+        self.cur_step = 0
+        self.cash_in_hand = self.initial_investment
+        self.stock_owned = 0
+        return self._get_obs() 
+
+    def step(self, action):
+        
+        prev_val = self._get_val()
+        
+        self.cur_step += 1
+
+        self._trade(action)
+
+        # get the new value after taking the action
+        cur_val = self._get_val()
+
+        reward = cur_val - prev_val
+        obs = self._get_obs()
+        done = self.cur_step == self.n_step - 1
+        info = {'cur_val': cur_val}
+
+
+        return obs, reward, done, info
+
+    def _trade(self, action):
+
+        # Mimic buying/selling the next day at open
+        # from getting the previous day's prices.
+        stock_price = self._get_stock_price_open()
+
+        # sell
+        shares_to_sell = 0
+        if action[0] == 2:
+            shares_to_sell = action[1]
+        
+        # buy
+        shares_to_buy = 0
+        if action[0] ==1:
+            shares_to_buy = action[1]
+
+        if shares_to_sell > 0:
+            # sell all shares
+            if self.stock_owned < shares_to_sell:
+                self.cash_in_hand += self.stock_owned * stock_price
+                self.stock_owned = 0
+            else:
+                self.stock_owned -= shares_to_sell
+                self.cash_in_hand += shares_to_sell * stock_price
+        
+        
+        if shares_to_buy > 0:
+            can_buy = True
+            shares_bought = 0
+            while can_buy:
+                if self.cash_in_hand > stock_price and shares_bought < shares_to_buy:
+                    self.stock_owned += 1
+                    shares_bought += 1
+                    self.cash_in_hand -= stock_price
+                else:
+                    can_buy = False
+
+    
+    def _get_obs(self):
+        """
+        Return array with number stock owned, stock price and cash in hand.
+        Ex: [stock_owned, cash_in_hand, date, hclo, volume]
+        """
+        obs = np.empty(self.state_dim)
+        obs[0] = self.stock_owned
+        obs[1] = self.cash_in_hand
+        # date
+        obs[2] = self._convert_date_str_to_datetime(self.data[self.cur_step][0]).timestamp()
+        obs[3:] = self.data[self.cur_step][1:]
+        return obs
+
+    def _get_val(self):
+        return self.stock_owned * self._get_stock_price_close() + self.cash_in_hand
+    
+    def _get_stock_price_close(self):
+        return self.data[self.cur_step][self._close_idx]
+
+    def _get_stock_price_open(self):
+        return self.data[self.cur_step][self._open_idx]
+
+    def _load_data(self):
+        raise NotImplementedError
+
+    def _convert_date_str_to_datetime(self,datestr):
+        raise NotImplementedError
+
+class DailySpyEnv(SpyEnv):
+    def __init__(self):
+        self.date_str_format = '%m/%d/%Y'
+        super().__init__()
+    
+    def _convert_date_str_to_datetime(self,datestr):
+        if sys.version_info[1] <=5:
+            datestr = re.sub(r'([-+]\d{2}):(\d{2})(?:(\d{2}))?$', r'\1\2\3', datestr)
+        return datetime.strptime(datestr,self.date_str_format)
+    
+    def _load_data(self):
+        data_file = os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
+        df = pd.read_csv(data_file)
+        return df.columns.values, df.values
+
+class IntradaySpyEnv(SpyEnv):
+    def __init__(self):
+        self.date_str_format = '%Y-%m-%d %H:%M:%S%z'
+        super().__init__()
+    
+    def _convert_date_str_to_datetime(self,datestr):
+        if sys.version_info[1] <=5:
+            datestr = re.sub(r'([-+]\d{2}):(\d{2})(?:(\d{2}))?$', r'\1\2\3', datestr)
+        return datetime.strptime(datestr,self.date_str_format)
+    
+    def _load_data(self):
+        data_file = os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_2017_2019_all.csv')
+        df = pd.read_csv(data_file)
+        return df.columns.values, df.values
