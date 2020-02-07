@@ -41,9 +41,10 @@ class SpyEnv(Env):
     def step(self, action):
         
         prev_val = self._get_val()
-        
-        self.cur_step += 1
-
+        if self.cur_step < self.n_step -1:
+            self.cur_step += 1
+        else:
+            print('WARNING - this environment is done')
         self._trade(action)
 
         # get the new value after taking the action
@@ -51,14 +52,15 @@ class SpyEnv(Env):
 
         reward = cur_val - prev_val
         obs = self._get_obs()
-        done = self.cur_step == self.n_step - 1
+        done = self.cur_step >= self.n_step - 1
         info = {'cur_val': cur_val}
 
 
         return obs, reward, done, info
 
     def _trade(self, action):
-
+        
+        action[1] = round(action[1])
         # Mimic buying/selling the next day at open
         # from getting the previous day's prices.
         stock_price = self._get_stock_price_open()

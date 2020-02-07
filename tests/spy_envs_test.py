@@ -13,6 +13,32 @@ def spy_intraday_minute_v0_env():
 def test_make_spy_intraday_v0_env(spy_intraday_minute_v0_env):
     assert type(spy_intraday_minute_v0_env) == IntradaySpyEnv
 
+def test_spy_intraday_minute_v0_init_values(spy_intraday_minute_v0_env):
+    assert spy_intraday_minute_v0_env.cur_step == 0
+    assert spy_intraday_minute_v0_env.n_step == len(spy_intraday_minute_v0_env.data)
+    assert spy_intraday_minute_v0_env.initial_investment == 25000
+    assert spy_intraday_minute_v0_env.cash_in_hand == spy_intraday_minute_v0_env.initial_investment
+    assert spy_intraday_minute_v0_env.stock_owned == 0
+    assert len(spy_intraday_minute_v0_env.headers) == 6
+    assert spy_intraday_minute_v0_env.state_dim == 8
+    assert spy_intraday_minute_v0_env._close_idx == 4
+    assert spy_intraday_minute_v0_env._open_idx == 1
+
+def test_spy_intraday_minute_v0_reset(spy_intraday_minute_v0_env):
+    observation = spy_intraday_minute_v0_env.reset()
+    assert spy_intraday_minute_v0_env.cur_step == 0
+    assert spy_intraday_minute_v0_env.cash_in_hand == spy_intraday_minute_v0_env.initial_investment
+    assert spy_intraday_minute_v0_env.stock_owned == 0
+    assert len(observation) == spy_intraday_minute_v0_env.state_dim
+    assert observation[0] == 0
+    assert observation[1] == 25000
+    assert observation[2] == 1483453800.0
+    assert observation[3] == 225.04
+    assert observation[4] == 225.12
+    assert observation[5] == 224.93
+    assert observation[6] == 224.95
+    assert observation[7] == 774063
+
 def test_make_spy_daily_v0(spy_daily_v0_env):
     assert type(spy_daily_v0_env) == DailySpyEnv
 
@@ -54,6 +80,8 @@ def test_spy_daily_v0_reset_after_action(spy_daily_v0_env):
     assert observation[5] == 85.80
     assert observation[6] == 86.16
     assert observation[7] == 221772560
+
+# These are more SpyEnv testing common functionality. 
 
 def test_spy_daily_v0_step(spy_daily_v0_env):
     spy_daily_v0_env.reset()
@@ -112,8 +140,12 @@ def test_done(spy_daily_v0_env):
     
     assert spy_daily_v0_env.cur_step == len(spy_daily_v0_env.data)-1
 
+def test_done_doesnt_crash(spy_daily_v0_env):
+    spy_daily_v0_env.reset()
+    done = False
+    while not done:
+        _, _, done, _ = spy_daily_v0_env.step(spy_daily_v0_env.action_space.sample())
+    
+    spy_daily_v0_env.step(spy_daily_v0_env.action_space.sample())
 
-
-
-
-
+    assert spy_daily_v0_env.cur_step == len(spy_daily_v0_env.data)-1

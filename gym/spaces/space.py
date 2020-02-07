@@ -17,6 +17,6 @@ class BuyHoldSellSpace(Space):
         if seed:
             np.random.seed(seed)
         action = np.zeros(self.shape)
-        action[0] = np.random.randint(low=0,high=2)
+        action[0] = np.random.randint(low=0,high=3)
         action[1] = np.random.randint(low=0,high=100)
         return action
