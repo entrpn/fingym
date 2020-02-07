@@ -65,7 +65,7 @@ Examples
 
 See the ``examples`` directory.
 
-- Run `examples/agents/buy_and_hold_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/buy_and_hold_agent.py`_ to run a simple buy and hold agent.
+- Run `examples/agents/buy_and_hold_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/buy_and_hold_agent.py>`_ to run a simple buy and hold agent.
 - Run `examples/agents/random_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/random_agent.py>`_ to run a simple random agent.
 
 Testing
