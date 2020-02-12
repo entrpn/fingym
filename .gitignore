@@ -1,3 +1,6 @@
 *cache*
 *.pyc
 .vscode
+*.h5
+
+dqn_model_weights
