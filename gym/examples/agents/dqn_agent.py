@@ -193,11 +193,11 @@ if __name__ == '__main__':
     parser.add_argument('env_id', nargs='?', default='SPY-Daily-v0', help='Select the environment to run')
     args = parser.parse_args()
 
-    train = False
+    train = True
     if train:
-        rang = 1
+        rang = 100
     else:
-        rang = 10
+        rang = 1
 
     # collect the last 10 time frames (10 days for daily env) and use that to make a prediction for current action
     time_frame = 10
