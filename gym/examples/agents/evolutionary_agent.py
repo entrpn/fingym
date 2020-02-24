@@ -29,6 +29,7 @@ import argparse
 import numpy as np
 
 import copy
+import os
 
 class EvoAgent():
     def __init__(self, env_state_dim, time_frame):
@@ -67,11 +68,15 @@ class EvoAgent():
         state = np.reshape(state,(self.state_size*self.time_frame,1))
 
         output_probabilities = self.model.predict_on_batch(state.T)[0]
+        #output_probabilities /= output_probabilities.sum()
         #print('output_probabilities: ', output_probabilities)
         action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
         #print('action: ', action)
         env_action = self._nn_action_to_env_action(action)
         return env_action
+    
+    def save_model_weights(self, filepath):
+        self.model.save_weights(filepath)
     
     def _build_compile_model(self):
         model = Sequential()
@@ -82,7 +87,8 @@ class EvoAgent():
         #model.add(Dense(1, activation='softmax',use_bias=True))
         model.add(Dense(self.action_size, activation='softmax',use_bias=True))
         # we won't really use loss or optimizer for evolutionary agents
-        model.compile(loss='mse', optimizer=Adam(learning_rate=0.01))
+        #model.compile(loss='mse', optimizer=Adam(learning_rate=0.01))
+        model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.01))
         #print(model.summary())
         return model
     
@@ -141,6 +147,7 @@ def run_agents_n_times(env, agents, runs):
     return avg_score
 
 def mutate(agent):
+    print('mutate')
     child_agent = agent.deep_copy()
 
     mutation_power = 0.02
@@ -171,7 +178,7 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
     top_elite_index = None
     
     for i in candidate_elite_index:
-        score = return_average_score(env, agents[i],runs=5)
+        score = return_average_score(env, agents[i],runs=1)
         print("Score for elite i ", i, " is ", score)
         
         if(top_score is None):
@@ -182,6 +189,8 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
             top_elite_index = i
             
     print("Elite selected with index ",top_elite_index, " and score", top_score)
+    dirname = os.path.dirname(__file__)
+    agents[top_elite_index].save_model_weights(os.path.join(dirname,'evo_weights.h5'))
     
     child_agent = agents[top_elite_index].deep_copy()
     return child_agent
@@ -213,7 +222,7 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 500
+    num_agents = 200
 
     agents = create_random_agents(num_agents, state_size, time_frame)
 
@@ -226,7 +235,7 @@ if __name__ == '__main__':
     elite_index = None
 
     for generation in range(generations):
-        rewards = run_agents_n_times(env,agents,5) # average of x times
+        rewards = run_agents_n_times(env,agents,1) # average of x times
 
         # sort by rewards
         sorted_parent_indexes = np.argsort(rewards)[::-1][:top_limit]
