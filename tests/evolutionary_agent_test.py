@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
-import numpy as np
-import itertools
-from datetime import datetime, timedelta
-import re
-import sys
-import os
-from .envs.spy_envs import DailySpyEnv, IntradaySpyEnv
+import pytest
 
-default_data_file = os.path.join(os.path.dirname(__file__),'data/filtered_spy_2017_2019_all.csv')
+from gym.examples.agents.evolutionary_agent import EvoAgent, create_random_agents
 
-def make(envName, data_file=default_data_file):
-    if envName == 'SPY-Daily-v0':
-        return DailySpyEnv()
-    if envName == 'SPY-Minute-v0':
-        return IntradaySpyEnv()
+@pytest.fixture
+def env():
+    return 
+
+@pytest.fixture
+def agent():
+    return EvoAgent()
+
+def test_create_random_agents():
+    num_agents = 500
+    state_size = 5
+    time_frame = 30
+    agents = create_random_agents(num_agents,state_size,time_frame)
+    assert len(agents) == num_agents
+    agents[0].state_size == state_size
+    agents[0].time_frame == time_frame
+    agents[0].action_size == 7
+
+
+
+
