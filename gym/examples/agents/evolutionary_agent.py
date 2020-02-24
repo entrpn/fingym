@@ -18,6 +18,7 @@
 from collections import deque
 
 import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras.models import model_from_json, clone_model
 from tensorflow.keras import Model, Sequential
 from tensorflow.keras.layers import Dense, Embedding, Reshape
@@ -82,10 +83,10 @@ class EvoAgent():
         model = Sequential()
 
         input_size = self.state_size * self.time_frame
-        model.add(Dense(400, input_shape=(input_size,), activation='relu', use_bias=True))
-        model.add(Dense(300, activation='relu'))
+        model.add(Dense(400, input_shape=(input_size,), activation='relu',kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
+        model.add(Dense(300, activation='relu', kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
         #model.add(Dense(1, activation='softmax',use_bias=True))
-        model.add(Dense(self.action_size, activation='softmax',use_bias=True))
+        model.add(Dense(self.action_size, activation='softmax',use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
         # we won't really use loss or optimizer for evolutionary agents
         #model.compile(loss='mse', optimizer=Adam(learning_rate=0.01))
         model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.01))
@@ -135,9 +136,10 @@ def run_agent(env, agent):
 
 def return_average_score(env, agent, runs):
     score = 0
+    print('***** agent score *****')
     for i in range(runs):
         score += run_agent(env, agent)
-    
+        print('score: ', score)
     return score/runs
 
 def run_agents_n_times(env, agents, runs):
@@ -178,7 +180,7 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
     top_elite_index = None
     
     for i in candidate_elite_index:
-        score = return_average_score(env, agents[i],runs=1)
+        score = return_average_score(env, agents[i],runs=5)
         print("Score for elite i ", i, " is ", score)
         
         if(top_score is None):
@@ -222,9 +224,17 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 200
+    num_agents = 400
 
     agents = create_random_agents(num_agents, state_size, time_frame)
+
+    # first agent gets saved weights
+    dirname = os.path.dirname(__file__)
+    os.path.join(dirname,'evo_weights.h5')
+    weights_file=os.path.join(dirname,'evo_weights.h5')
+    if os.path.exists(weights_file):
+        print('loading existing weights')
+        agents[0].model.load_weights(weights_file)
 
     # how many top agents to consider as parents
     top_limit = 20
@@ -235,7 +245,7 @@ if __name__ == '__main__':
     elite_index = None
 
     for generation in range(generations):
-        rewards = run_agents_n_times(env,agents,1) # average of x times
+        rewards = run_agents_n_times(env,agents,5) # average of x times
 
         # sort by rewards
         sorted_parent_indexes = np.argsort(rewards)[::-1][:top_limit]
