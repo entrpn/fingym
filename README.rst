@@ -67,6 +67,9 @@ See the ``examples`` directory.
 
 - Run `examples/agents/buy_and_hold_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/buy_and_hold_agent.py>`_ to run a simple buy and hold agent.
 - Run `examples/agents/random_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/random_agent.py>`_ to run a simple random agent.
+- Run `examples/agents/dqn_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/dqn_agent.py>`_ to run a dqn agent.
+- Run `examples/agents/evolutionary_agent.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/evolutionary_agent.py>`_ to run a generic algorithm.
+- Run `examples/agents/evolutionary_agent_w_crossover.py <https://github.com/entrpn/fingym/blob/master/gym/examples/agents/evolutionary_agent_w_crossover.py>`_ to run a generic algorithm using crossover.
 
 Testing
 =======
