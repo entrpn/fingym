@@ -157,17 +157,20 @@ def mutate(agent):
     weights = child_agent.model.get_weights()
 
     for weight in weights:
+        #print('weight len: ', len(weight.shape))
         
-        if len(weight) == 2:
+        if len(weight.shape) == 2:
             for i0 in range(weight.shape[0]):
                 for i1 in range(weight.shape[1]):
-                    weight[i0,i1] = mutation_power*np.random.randn()
+                    weight[i0,i1]+= mutation_power*np.random.randn()
 
-        if len(weight) == 1:
+        if len(weight.shape) == 1:
             for i0 in range(weight.shape[0]):
-                weight[i0] = mutation_power*np.random.randn()
+                weight[i0]+= mutation_power*np.random.randn()
     
     child_agent.model.set_weights(weights)
+    #print('parent_weights: ', agent.model.get_weights())
+    #print('child_weights: ', child_agent.model.get_weights())
     return child_agent
 
 def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consider_top_n=10):
