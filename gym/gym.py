@@ -20,6 +20,8 @@ import re
 import sys
 import os
 from .envs.spy_envs import DailySpyEnv, IntradaySpyEnv
+from .envs.tsla_envs import TslaDailyEnv
+from .envs.googl_envs import GooglDailyEnv
 
 default_data_file = os.path.join(os.path.dirname(__file__),'data/filtered_spy_2017_2019_all.csv')
 
@@ -28,3 +30,9 @@ def make(envName, data_file=default_data_file):
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
         return IntradaySpyEnv()
+    if envName == 'TSLA-Daily-v0':
+        return TslaDailyEnv()
+    if envName == 'Googl-Daily-v0':
+        return GooglDailyEnv()
+    else:
+        raise NotImplementedError

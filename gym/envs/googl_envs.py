@@ -12,28 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
+from gym.envs.spy_envs import DailySpyEnv
 
-from gym.examples.agents.evolutionary_agent import EvoAgent, create_random_agents
-
-@pytest.fixture
-def env():
-    return 
-
-# @pytest.fixture
-# def agent():
-#     return EvoAgent()
-
-# def test_create_random_agents():
-#     num_agents = 500
-#     state_size = 5
-#     time_frame = 30
-#     agents = create_random_agents(num_agents,state_size,time_frame)
-#     assert len(agents) == num_agents
-#     agents[0].state_size == state_size
-#     agents[0].time_frame == time_frame
-#     agents[0].action_size == 7
-
-
-
-
+class GooglDailyEnv(DailySpyEnv):
+    def __init__(self):
+        super().__init__()

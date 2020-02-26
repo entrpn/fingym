@@ -12,28 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from gym.envs.googl_envs import GooglDailyEnv
+
 import pytest
 
-from gym.examples.agents.evolutionary_agent import EvoAgent, create_random_agents
-
 @pytest.fixture
-def env():
-    return 
+def googl_daily_v0_env():
+    return GooglDailyEnv()
 
-# @pytest.fixture
-# def agent():
-#     return EvoAgent()
-
-# def test_create_random_agents():
-#     num_agents = 500
-#     state_size = 5
-#     time_frame = 30
-#     agents = create_random_agents(num_agents,state_size,time_frame)
-#     assert len(agents) == num_agents
-#     agents[0].state_size == state_size
-#     agents[0].time_frame == time_frame
-#     agents[0].action_size == 7
-
-
-
-
+def test_make_tsla_daily_v0_env(googl_daily_v0_env):
+    assert type(googl_daily_v0_env) == GooglDailyEnv
