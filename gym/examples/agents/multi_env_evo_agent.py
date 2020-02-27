@@ -150,7 +150,7 @@ def run_agent(env, agent):
     state = env.reset()
     # Removed time element from state
     state = np.delete(state, 2)
-    state_as_percentages = [0,0,0,0,0]
+    state_as_percentages = state
     done = False
     while not done:
         print(state_as_percentages)
@@ -161,11 +161,11 @@ def run_agent(env, agent):
             next_state = np.delete(next_state, 2)
         print('next_state: ',next_state)
         print('state: ', state)
-        opn = (next_state[0] - state[0]) / next_state[0]
-        high = (next_state[1] - state[1]) / next_state[1]
-        low = (next_state[2] - state[2]) / next_state[2]
-        close = (next_state[3] - state[3]) / next_state[3]
-        volume = (next_state[4] - state[4]) / next_state[4]
+        opn = (next_state[2] - state[2]) / next_state[2]
+        high = (next_state[3] - state[3]) / next_state[3]
+        low = (next_state[4] - state[4]) / next_state[4]
+        close = (next_state[5] - state[5]) / next_state[5]
+        volume = (next_state[6] - state[6]) / next_state[6]
         state_as_percentages = [opn, high, low, close, volume]
         state = next_state
     return info['cur_val']
