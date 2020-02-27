@@ -22,17 +22,37 @@ import os
 from .envs.spy_envs import DailySpyEnv, IntradaySpyEnv
 from .envs.tsla_envs import TslaDailyEnv
 from .envs.googl_envs import GooglDailyEnv
+from .envs.cgc_envs import CgcDailyEnv
+from .envs.cron_envs import CronDailyEnv
+from .envs.cgc_envs import CgcDailyEnv
+from .envs.ba_envs import BaDailyEnv
+from .envs.amzn_envs import AmznDailyEnv
+from .envs.amd_envs import AmdDailyEnv
+from .envs.abbv_envs import AbbvDailyEnv
+from .envs.aapl_envs import AaplDailyEnv
 
-default_data_file = os.path.join(os.path.dirname(__file__),'data/filtered_spy_2017_2019_all.csv')
-
-def make(envName, data_file=default_data_file):
+def make(envName):
     if envName == 'SPY-Daily-v0':
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
         return IntradaySpyEnv()
     if envName == 'TSLA-Daily-v0':
         return TslaDailyEnv()
-    if envName == 'Googl-Daily-v0':
+    if envName == 'GOOGL-Daily-v0':
         return GooglDailyEnv()
+    if envName == 'CGC-Daily-v0':
+        return CgcDailyEnv()
+    if envName == 'CRON-Daily-v0':
+        return CronDailyEnv()
+    if envName == 'BA-Daily-v0':
+        return BaDailyEnv()
+    if envName == 'AMZN-Daily-v0':
+        return AmznDailyEnv()
+    if envName == 'AMD-Daily-v0':
+        return AmdDailyEnv()
+    if envName == 'ABBV-Daily-v0':
+        return AbbvDailyEnv()
+    if envName == 'AAPL-Daily-v0':
+        return AaplDailyEnv()
     else:
         raise NotImplementedError

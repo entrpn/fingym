@@ -13,7 +13,11 @@
 # limitations under the License.
 
 from gym.envs.spy_envs import DailySpyEnv
+import os
 
 class GooglDailyEnv(DailySpyEnv):
     def __init__(self):
         super().__init__()
+
+    def _get_data_file(self):
+        return os.path.join(os.path.dirname(__file__),'..','data/filtered_googl_data_10_yrs.csv')

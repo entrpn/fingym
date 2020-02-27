@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.tsla_envs import TslaDailyEnv
+from gym.envs.aapl_envs import AaplDailyEnv
+
 import pytest
 
 @pytest.fixture
-def tsla_daily_v0_env():
-    return TslaDailyEnv()
+def aapl_daily_v0_env():
+    return AaplDailyEnv()
 
-def test_make_tsla_daily_v0_env(tsla_daily_v0_env):
-    assert type(tsla_daily_v0_env) == TslaDailyEnv
+def test_make_aapl_daily_v0_env(aapl_daily_v0_env):
+    assert type(aapl_daily_v0_env) == AaplDailyEnv
 
-def test_tsla_daily_v0_file_location(tsla_daily_v0_env):
-    assert 'filtered_tsla_data' in tsla_daily_v0_env._get_data_file()
+def test_amd_daily_v0_file_location(aapl_daily_v0_env):
+    assert 'filtered_aapl_data' in aapl_daily_v0_env._get_data_file()

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.gym import make, DailySpyEnv, IntradaySpyEnv
+from gym.gym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv
 
 import pytest
 
@@ -24,8 +24,64 @@ def spy_daily_v0_env():
 def spy_intraday_v0_env():
     return make('SPY-Minute-v0')
 
+@pytest.fixture
+def googl_daily_v0_env():
+    return make('GOOGL-Daily-v0')
+
+@pytest.fixture
+def cron_daily_v0_env():
+    return make('CRON-Daily-v0')
+
+@pytest.fixture
+def cgc_daily_v0_env():
+    return make('CGC-Daily-v0')
+
+@pytest.fixture
+def ba_daily_v0_env():
+    return make('BA-Daily-v0')
+
+@pytest.fixture
+def amzn_daily_v0_env():
+    return make('AMZN-Daily-v0')
+
+@pytest.fixture
+def amd_daily_v0_env():
+    return make('AMD-Daily-v0')
+
+@pytest.fixture
+def abbv_daily_v0_env():
+    return make('ABBV-Daily-v0')
+
+@pytest.fixture
+def aapl_daily_v0_env():
+    return make('AAPL-Daily-v0')
+
 def test_make_spy_daily_v0(spy_daily_v0_env):
     assert type(spy_daily_v0_env) == DailySpyEnv
 
 def test_make_spy_intraday_v0(spy_intraday_v0_env):
     assert type(spy_intraday_v0_env) == IntradaySpyEnv
+
+def test_make_googl_daily_v0(googl_daily_v0_env):
+    assert type(googl_daily_v0_env) == GooglDailyEnv
+
+def test_make_cron_daily_v0(cron_daily_v0_env):
+    assert type(cron_daily_v0_env) == CronDailyEnv
+
+def test_make_cgc_daily_v0(cgc_daily_v0_env):
+    assert type(cgc_daily_v0_env) == CgcDailyEnv
+
+def test_make_ba_daily_v0(ba_daily_v0_env):
+    assert type(ba_daily_v0_env) == BaDailyEnv
+
+def test_make_amzn_daily_v0(amzn_daily_v0_env):
+    assert type(amzn_daily_v0_env) == AmznDailyEnv
+
+def test_make_amd_daily_v0(amd_daily_v0_env):
+    assert type(amd_daily_v0_env) == AmdDailyEnv
+
+def test_make_abbv_daily_v0(abbv_daily_v0_env):
+    assert type(abbv_daily_v0_env) == AbbvDailyEnv
+
+def test_make_aapl_daily_v0(aapl_daily_v0_env):
+    assert type(aapl_daily_v0_env) == AaplDailyEnv

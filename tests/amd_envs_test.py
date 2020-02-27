@@ -12,28 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from gym.envs.amd_envs import AmdDailyEnv
+
 import pytest
 
-from gym.examples.agents.evolutionary_agent import EvoAgent, create_random_agents
-
 @pytest.fixture
-def env():
-    return 
+def amd_daily_v0_env():
+    return AmdDailyEnv()
 
-# @pytest.fixture
-# def agent():
-#     return EvoAgent()
+def test_make_amd_daily_v0_env(amd_daily_v0_env):
+    assert type(amd_daily_v0_env) == AmdDailyEnv
 
-# def test_create_random_agents():
-#     num_agents = 500
-#     state_size = 5
-#     time_frame = 30
-#     agents = create_random_agents(num_agents,state_size,time_frame)
-#     assert len(agents) == num_agents
-#     agents[0].state_size == state_size
-#     agents[0].time_frame == time_frame
-#     agents[0].action_size == 7
-
-
-
-
+def test_amd_daily_v0_file_location(amd_daily_v0_env):
+    assert 'filtered_amd_data' in amd_daily_v0_env._get_data_file()

@@ -20,5 +20,9 @@ import pytest
 def googl_daily_v0_env():
     return GooglDailyEnv()
 
-def test_make_tsla_daily_v0_env(googl_daily_v0_env):
+def test_make_googl_daily_v0_env(googl_daily_v0_env):
     assert type(googl_daily_v0_env) == GooglDailyEnv
+
+
+def test_googl_daily_v0_file_location(googl_daily_v0_env):
+    assert 'filtered_googl_data' in googl_daily_v0_env._get_data_file()

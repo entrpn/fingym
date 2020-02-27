@@ -150,9 +150,12 @@ class DailySpyEnv(SpyEnv):
         return datetime.strptime(datestr,self.date_str_format)
     
     def _load_data(self):
-        data_file = os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
+        data_file = self._get_data_file()
         df = pd.read_csv(data_file)
         return df.columns.values, df.values
+    
+    def _get_data_file(self):
+        return os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
 
 class IntradaySpyEnv(SpyEnv):
     def __init__(self):

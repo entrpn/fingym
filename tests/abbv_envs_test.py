@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.tsla_envs import TslaDailyEnv
+from gym.envs.abbv_envs import AbbvDailyEnv
+
 import pytest
 
 @pytest.fixture
-def tsla_daily_v0_env():
-    return TslaDailyEnv()
+def abbv_daily_v0_env():
+    return AbbvDailyEnv()
 
-def test_make_tsla_daily_v0_env(tsla_daily_v0_env):
-    assert type(tsla_daily_v0_env) == TslaDailyEnv
+def test_make_abbv_daily_v0_env(abbv_daily_v0_env):
+    assert type(abbv_daily_v0_env) == AbbvDailyEnv
 
-def test_tsla_daily_v0_file_location(tsla_daily_v0_env):
-    assert 'filtered_tsla_data' in tsla_daily_v0_env._get_data_file()
+def test_amd_daily_v0_file_location(abbv_daily_v0_env):
+    assert 'filtered_abbv_data' in abbv_daily_v0_env._get_data_file()

@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.tsla_envs import TslaDailyEnv
+from gym.envs.cgc_envs import CgcDailyEnv
+
 import pytest
 
 @pytest.fixture
-def tsla_daily_v0_env():
-    return TslaDailyEnv()
+def cgc_daily_v0_env():
+    return CgcDailyEnv()
 
-def test_make_tsla_daily_v0_env(tsla_daily_v0_env):
-    assert type(tsla_daily_v0_env) == TslaDailyEnv
+def test_make_cgc_daily_v0_env(cgc_daily_v0_env):
+    assert type(cgc_daily_v0_env) == CgcDailyEnv
 
-def test_tsla_daily_v0_file_location(tsla_daily_v0_env):
-    assert 'filtered_tsla_data' in tsla_daily_v0_env._get_data_file()
+def test_cgc_daily_v0_file_location(cgc_daily_v0_env):
+    assert 'filtered_cgc_data' in cgc_daily_v0_env._get_data_file()

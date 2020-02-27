@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.tsla_envs import TslaDailyEnv
+from gym.envs.amzn_envs import AmznDailyEnv
+
 import pytest
 
 @pytest.fixture
-def tsla_daily_v0_env():
-    return TslaDailyEnv()
+def amzn_daily_v0_env():
+    return AmznDailyEnv()
 
-def test_make_tsla_daily_v0_env(tsla_daily_v0_env):
-    assert type(tsla_daily_v0_env) == TslaDailyEnv
+def test_make_amzn_daily_v0_env(amzn_daily_v0_env):
+    assert type(amzn_daily_v0_env) == AmznDailyEnv
 
-def test_tsla_daily_v0_file_location(tsla_daily_v0_env):
-    assert 'filtered_tsla_data' in tsla_daily_v0_env._get_data_file()
+def test_amzn_daily_v0_file_location(amzn_daily_v0_env):
+    assert 'filtered_amzn_data' in amzn_daily_v0_env._get_data_file()

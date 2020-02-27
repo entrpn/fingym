@@ -20,5 +20,8 @@ import pytest
 def cron_daily_v0_env():
     return CronDailyEnv()
 
-def test_make_tsla_daily_v0_env(cron_daily_v0_env):
+def test_make_cron_daily_v0_env(cron_daily_v0_env):
     assert type(cron_daily_v0_env) == CronDailyEnv
+
+def test_cron_daily_v0_file_location(cron_daily_v0_env):
+    assert 'filtered_cron_data' in cron_daily_v0_env._get_data_file()
