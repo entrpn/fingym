@@ -32,6 +32,28 @@ import numpy as np
 import copy
 import os
 
+envs = []
+spyEnv = gym.make('SPY-Daily-v0')
+envs.append(spyEnv)
+tslaEnv = gym.make('TSLA-Daily-v0')
+envs.append(tslaEnv)
+googlEnv = gym.make('GOOGL-Daily-v0')
+envs.append(googlEnv)
+cgcEnv = gym.make('CGC-Daily-v0')
+envs.append(cgcEnv)
+cronEnv = gym.make('CRON-Daily-v0')
+envs.append(cronEnv)
+baEnv = gym.make('BA-Daily-v0')
+envs.append(baEnv)
+amznEnv = gym.make('AMZN-Daily-v0')
+envs.append(amznEnv)
+amdEnv = gym.make('AMD-Daily-v0')
+envs.append(amdEnv)
+abbvEnv = gym.make('ABBV-Daily-v0')
+envs.append(abbvEnv)
+aaplEnv = gym.make('AAPL-Daily-v0')
+envs.append(aaplEnv)
+
 class EvoAgent():
     def __init__(self, env_state_dim, time_frame):
         self.state_size = env_state_dim
@@ -69,10 +91,13 @@ class EvoAgent():
         state = np.reshape(state,(self.state_size*self.time_frame,1))
 
         output_probabilities = self.model.predict_on_batch(state.T)[0]
-        #output_probabilities /= output_probabilities.sum()
-        #print('output_probabilities: ', output_probabilities)
-        action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
-        #print('action: ', action)
+        output_probabilities = np.array(output_probabilities)
+        output_probabilities /= output_probabilities.sum()
+        try:
+            action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
+        except:
+            print('output probabilities: ', output_probabilities)
+            action = np.zeros(2)
         env_action = self._nn_action_to_env_action(action)
         return env_action
     
@@ -134,18 +159,24 @@ def run_agent(env, agent):
             state = np.delete(state, 2)
     return info['cur_val']
 
-def return_average_score(env, agent, runs):
+def return_average_score(envs, agent, runs):
     score = 0
     print('***** agent score *****')
-    for i in range(runs):
-        score += run_agent(env, agent)
-        print('score: ', score)
-    return score/runs
+    for env in envs:
+        print('env: ',type(env))
+        envScore = 0
+        for i in range(runs):
+            envScore += run_agent(env, agent)
+        print('avg score: ',envScore/runs)
+        score += envScore/runs
+    score = score/len(envs)
+    print('score: ', envScore)
+    return score/len(envs)
 
-def run_agents_n_times(env, agents, runs):
+def run_agents_n_times(envs, agents, runs):
     avg_score = []
     for agent in agents:
-        avg_score.append(return_average_score(env, agent, runs))
+        avg_score.append(return_average_score(envs, agent, runs))
     return avg_score
 
 def mutate(agent):
@@ -173,7 +204,7 @@ def mutate(agent):
     #print('child_weights: ', child_agent.model.get_weights())
     return child_agent
 
-def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consider_top_n=10):
+def add_elite(envs, agents, sorted_parent_indexes, elite_index = None, only_consider_top_n=10):
     candidate_elite_index = sorted_parent_indexes[:only_consider_top_n]
 
     if(elite_index is not None):
@@ -183,7 +214,7 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
     top_elite_index = None
     
     for i in candidate_elite_index:
-        score = return_average_score(env, agents[i],runs=5)
+        score = return_average_score(envs, agents[i],runs=5)
         print("Score for elite i ", i, " is ", score)
         
         if(top_score is None):
@@ -200,7 +231,7 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
     child_agent = agents[top_elite_index].deep_copy()
     return child_agent
 
-def return_children(env, agents, sorted_parent_indexes, elite_index):
+def return_children(envs, agents, sorted_parent_indexes, elite_index):
     children_agents = []
 
     for i in range(len(agents) -1):
@@ -209,21 +240,16 @@ def return_children(env, agents, sorted_parent_indexes, elite_index):
         
     
     # now add one elite
-    elite_child = add_elite(env, agents, sorted_parent_indexes, elite_index)
+    elite_child = add_elite(envs, agents, sorted_parent_indexes, elite_index)
     children_agents.append(elite_child)
     elite_index=len(children_agents)-1
 
     return children_agents, elite_index
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('env_id', nargs='?', default='SPY-Daily-v0', help='Select the environment to run')
-    args = parser.parse_args()
-
-    env = gym.make(args.env_id)
 
     # removing time element from state_dim
-    state_size = env.state_dim - 1
+    state_size = envs[0].state_dim - 1
     print('state_size: ', state_size)
 
     time_frame = 30
@@ -248,7 +274,7 @@ if __name__ == '__main__':
     elite_index = None
 
     for generation in range(generations):
-        rewards = run_agents_n_times(env,agents,5) # average of x times
+        rewards= run_agents_n_times(envs,agents,5) # average of x times
 
         # sort by rewards
         sorted_parent_indexes = np.argsort(rewards)[::-1][:top_limit]
@@ -261,6 +287,6 @@ if __name__ == '__main__':
         print("Top ",top_limit," scores", sorted_parent_indexes)
         print("Rewards for top: ",top_rewards)
 
-        children_agents, elite_index = return_children(env, agents, sorted_parent_indexes, elite_index)
+        children_agents, elite_index = return_children(envs, agents, sorted_parent_indexes, elite_index)
 
         agents = children_agents
