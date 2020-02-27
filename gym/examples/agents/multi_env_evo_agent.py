@@ -153,14 +153,10 @@ def run_agent(env, agent):
     state_as_percentages = state
     done = False
     while not done:
-        print(state_as_percentages)
-        input()
         action = agent.act(state_as_percentages)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
-        print('next_state: ',next_state)
-        print('state: ', state)
         opn = (next_state[2] - state[2]) / next_state[2]
         high = (next_state[3] - state[3]) / next_state[3]
         low = (next_state[4] - state[4]) / next_state[4]
