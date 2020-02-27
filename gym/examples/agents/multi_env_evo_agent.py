@@ -159,12 +159,12 @@ def run_agent(env, agent):
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(state, 2)
-        open = (next_state[0] - state[0]) / next_state[0]
+        opn = (next_state[0] - state[0]) / next_state[0]
         high = (next_state[1] - state[1]) / next_state[1]
         low = (next_state[2] - state[2]) / next_state[2]
         close = (next_state[3] - state[3]) / next_state[3]
         volume = (next_state[4] - next_state[4]) / next_state[4]
-        state_as_percentages = [open, high, low, close, volume]
+        state_as_percentages = [opn, high, low, close, volume]
         state = next_state
     return info['cur_val']
 
