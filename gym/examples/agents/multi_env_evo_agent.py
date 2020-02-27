@@ -162,7 +162,7 @@ def run_agent(env, agent):
         low = (next_state[4] - state[4]) / next_state[4]
         close = (next_state[5] - state[5]) / next_state[5]
         volume = (next_state[6] - state[6]) / next_state[6]
-        state_as_percentages = [opn, high, low, close, volume]
+        state_as_percentages = [next_state[0], next_state[1], opn, high, low, close, volume]
         state = next_state
     return info['cur_val']
 
