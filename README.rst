@@ -90,3 +90,4 @@ We are using `pytest <http://doc.pytest.org>`_ for tests. You can run them via:
 What's new
 ==========
 - 2020-02-05: First release. 3 year spy intraday minute steps. 10 year daily steps.
+- 2020-02-26: More environments from different symbols.
