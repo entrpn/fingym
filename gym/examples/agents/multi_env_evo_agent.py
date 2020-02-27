@@ -150,13 +150,22 @@ def run_agent(env, agent):
     state = env.reset()
     # Removed time element from state
     state = np.delete(state, 2)
+    state_as_percentages = [0,0,0,0,0]
     done = False
     while not done:
-        action = agent.act(state)
+        print(state_as_percentages)
+        input()
+        action = agent.act(state_as_percentages)
         next_state, reward, done, info = env.step(action)
+        if len(next_state) > agent.state_size:
+            next_state = np.delete(state, 2)
+        open = (next_state[0] - state[0]) / next_state[0]
+        high = (next_state[1] - state[1]) / next_state[1]
+        low = (next_state[2] - state[2]) / next_state[2]
+        close = (next_state[3] - state[3]) / next_state[3]
+        volume = (next_state[4] - next_state[4]) / next_state[4]
+        state_as_percentages = [open, high, low, close, volume]
         state = next_state
-        if len(state) > agent.state_size:
-            state = np.delete(state, 2)
     return info['cur_val']
 
 def return_average_score(envs, agent, runs):
