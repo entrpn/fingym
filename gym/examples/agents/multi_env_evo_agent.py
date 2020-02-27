@@ -177,8 +177,8 @@ def return_average_score(envs, agent, runs):
         print('avg score: ',envScore/runs)
         score += envScore/runs
     score = score/len(envs)
-    print('score: ', envScore)
-    return score/len(envs)
+    print('score: ', score)
+    return score
 
 def run_agents_n_times(envs, agents, runs):
     avg_score = []
