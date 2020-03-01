@@ -17,45 +17,67 @@
 
 from collections import deque
 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.models import model_from_json, clone_model
-from tensorflow.keras import Model, Sequential
-from tensorflow.keras.layers import Dense, Embedding, Reshape
-from tensorflow.keras.optimizers import Adam
+import uuid
+import ray
 
 from gym import gym
 
 import argparse
 import numpy as np
+print(np.version.version)
 
 import copy
 import os
 
+ray.init()
+
 envs = []
 spyEnv = gym.make('SPY-Daily-v0')
 envs.append(spyEnv)
-tslaEnv = gym.make('TSLA-Daily-v0')
-envs.append(tslaEnv)
-googlEnv = gym.make('GOOGL-Daily-v0')
-envs.append(googlEnv)
-cgcEnv = gym.make('CGC-Daily-v0')
-envs.append(cgcEnv)
-cronEnv = gym.make('CRON-Daily-v0')
-envs.append(cronEnv)
-baEnv = gym.make('BA-Daily-v0')
-envs.append(baEnv)
-amznEnv = gym.make('AMZN-Daily-v0')
-envs.append(amznEnv)
-amdEnv = gym.make('AMD-Daily-v0')
-envs.append(amdEnv)
-abbvEnv = gym.make('ABBV-Daily-v0')
-envs.append(abbvEnv)
-aaplEnv = gym.make('AAPL-Daily-v0')
-envs.append(aaplEnv)
+# tslaEnv = gym.make('TSLA-Daily-v0')
+# envs.append(tslaEnv)
+# googlEnv = gym.make('GOOGL-Daily-v0')
+# envs.append(googlEnv)
+# cgcEnv = gym.make('CGC-Daily-v0')
+# envs.append(cgcEnv)
+# cronEnv = gym.make('CRON-Daily-v0')
+# envs.append(cronEnv)
+# baEnv = gym.make('BA-Daily-v0')
+# envs.append(baEnv)
+# amznEnv = gym.make('AMZN-Daily-v0')
+# envs.append(amznEnv)
+# amdEnv = gym.make('AMD-Daily-v0')
+# envs.append(amdEnv)
+# abbvEnv = gym.make('ABBV-Daily-v0')
+# envs.append(abbvEnv)
+# aaplEnv = gym.make('AAPL-Daily-v0')
+# envs.append(aaplEnv)
+
+def build_compile_model(input_size, output_size):
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import Model, Sequential
+    from tensorflow.keras.layers import Dense, Embedding, Reshape
+    from tensorflow.keras.optimizers import Adam
+
+    model = Sequential()
+
+    model.add(Dense(400, input_shape=(input_size,), activation='relu',kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
+    model.add(Dense(300, activation='relu', kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
+    model.add(Dense(output_size, activation='softmax',use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.01))
+
+    return model
+
+def save_model_weights(model, filepath):
+    model.save_weights(filepath)
 
 class EvoAgent():
-    def __init__(self, env_state_dim, time_frame):
+    def __init__(self, env_state_dim, time_frame, weights, id = None):
+        if id is None:
+            self.id = uuid.uuid4()
+        else:
+            self.id = id
         self.state_size = env_state_dim
         self.time_frame = time_frame
         # when this is full, start making predictions
@@ -72,15 +94,14 @@ class EvoAgent():
 
         self.max_shares_to_trade_at_once = 100
 
-        self.model = self._build_compile_model()
+        self.weights = weights
     
-    def deep_copy(self):
-        new_agent = EvoAgent(self.state_size, self.time_frame)
-        new_agent.model.set_weights(self.model.get_weights())
-
+    def deep_copy(self, id=None):
+        weights = np.copy(self.weights)
+        new_agent = EvoAgent(self.state_size, self.time_frame, weights, id)
         return new_agent
     
-    def act(self, state):
+    def act(self, state, model):
         self.state_fifo.append(state)
 
         # do nothing for the first time frames until we can start the prediction
@@ -90,7 +111,7 @@ class EvoAgent():
         state = np.array(list(self.state_fifo))
         state = np.reshape(state,(self.state_size*self.time_frame,1))
 
-        output_probabilities = self.model.predict_on_batch(state.T)[0]
+        output_probabilities = model.predict_on_batch(state.T)[0]
         output_probabilities = np.array(output_probabilities)
         output_probabilities /= output_probabilities.sum()
         try:
@@ -100,23 +121,6 @@ class EvoAgent():
             action = np.zeros(2)
         env_action = self._nn_action_to_env_action(action)
         return env_action
-    
-    def save_model_weights(self, filepath):
-        self.model.save_weights(filepath)
-    
-    def _build_compile_model(self):
-        model = Sequential()
-
-        input_size = self.state_size * self.time_frame
-        model.add(Dense(400, input_shape=(input_size,), activation='relu',kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
-        model.add(Dense(300, activation='relu', kernel_initializer='he_uniform', use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
-        #model.add(Dense(1, activation='softmax',use_bias=True))
-        model.add(Dense(self.action_size, activation='softmax',use_bias=True, bias_initializer=keras.initializers.Constant(0.1)))
-        # we won't really use loss or optimizer for evolutionary agents
-        #model.compile(loss='mse', optimizer=Adam(learning_rate=0.01))
-        model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.01))
-        #print(model.summary())
-        return model
     
     def _nn_action_to_env_action(self,nn_action):
         env_action = [0,0]
@@ -141,19 +145,21 @@ class EvoAgent():
 def create_random_agents(num_agents, state_size, time_frame):
     agents = []
     for _ in range(num_agents):
-        agent = EvoAgent(state_size, time_frame)
+        model = build_compile_model(state_size * time_frame, 7)
+        agent = EvoAgent(state_size, time_frame, model.get_weights())
         agents.append(agent)
 
     return agents
 
-def run_agent(env, agent):
+def run_agent(env, agent, model):
+
     state = env.reset()
     # Removed time element from state
     state = np.delete(state, 2)
     state_as_percentages = state
     done = False
     while not done:
-        action = agent.act(state_as_percentages)
+        action = agent.act(state_as_percentages, model)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
@@ -166,49 +172,63 @@ def run_agent(env, agent):
         state = next_state
     return info['cur_val']
 
+@ray.remote
 def return_average_score(envs, agent, runs):
+    model = build_compile_model(agent.state_size * agent.time_frame, agent.action_size)
+    model.set_weights(agent.weights)
     score = 0
-    print('***** agent score *****')
+    # print('***** agent {} score *****'.format(agent.id))
     for env in envs:
-        print('env: ',type(env))
         envScore = 0
         for i in range(runs):
-            envScore += run_agent(env, agent)
-        print('avg score: ',envScore/runs)
+            envScore += run_agent(env, agent, model)
         score += envScore/runs
     score = score/len(envs)
-    print('score: ', score)
-    return score
+    print('agent {} env {} total score: {}'.format(agent.id,type(env),score))
+    return agent, score
 
 def run_agents_n_times(envs, agents, runs):
+    avg_score_map = {}
     avg_score = []
+    futures = [return_average_score.remote(envs,agent,runs) for agent in agents]
+    results = ray.get(futures)
+    for result in results:
+        avg_score_map[result[0].id] = result[1]
     for agent in agents:
-        avg_score.append(return_average_score(envs, agent, runs))
+        avg_score.append(avg_score_map[agent.id])
     return avg_score
 
 def mutate(agent):
     print('mutate')
-    child_agent = agent.deep_copy()
+    obj_id = ray.put(agent.weights)
+    child_agent = EvoAgent(agent.state_size, agent.time_frame, np.copy(ray.get(obj_id)))#ray.get(obj_id).deep_copy()
+    
+    #child_agent = agent.deep_copy()
 
     mutation_power = 0.02
 
-    weights = child_agent.model.get_weights()
+    weights = child_agent.weights
+    # array copied to object store (objects are immutable), not heap, so a copy must be made
+    # https://github.com/ray-project/ray/issues/369
+    #weights = np.copy(c_weights)
+    #weights.flags.writeable = True
+    #print('flags: ', weights.flags)
 
     for weight in weights:
-        #print('weight len: ', len(weight.shape))
         
         if len(weight.shape) == 2:
             for i0 in range(weight.shape[0]):
                 for i1 in range(weight.shape[1]):
+                    #print('flags: ', weight.flags)
+                    #weight.flags.writeable = True
                     weight[i0,i1]+= mutation_power*np.random.randn()
 
         if len(weight.shape) == 1:
             for i0 in range(weight.shape[0]):
+                #weight.flags.writeable = True
                 weight[i0]+= mutation_power*np.random.randn()
     
-    child_agent.model.set_weights(weights)
-    #print('parent_weights: ', agent.model.get_weights())
-    #print('child_weights: ', child_agent.model.get_weights())
+    child_agent.weights = weights
     return child_agent
 
 def add_elite(envs, agents, sorted_parent_indexes, elite_index = None, only_consider_top_n=10):
@@ -219,23 +239,31 @@ def add_elite(envs, agents, sorted_parent_indexes, elite_index = None, only_cons
 
     top_score = None
     top_elite_index = None
-    
-    for i in candidate_elite_index:
-        score = return_average_score(envs, agents[i],runs=5)
-        print("Score for elite i ", i, " is ", score)
-        
+    elite_agent = None
+
+    futures = [return_average_score.remote(envs, agents[i],runs=5) for i in candidate_elite_index]
+    results = ray.get(futures)
+    for result in results:
+        agent = result[0]
+        score = result[1]
+
+        print("Score for elite agent {} is {} ".format(agent.id,score))
+
         if(top_score is None):
             top_score = score
-            top_elite_index = i
+            elite_agent = agent
         elif(score > top_score):
             top_score = score
-            top_elite_index = i
+            elite_agent = agent
             
-    print("Elite selected with index ",top_elite_index, " and score", top_score)
+    print("Elite selected has id ",elite_agent.id, " and score", top_score)
+
+    model = build_compile_model(elite_agent.state_size * elite_agent.time_frame, elite_agent.action_size)
+    model.set_weights(elite_agent.weights)
     dirname = os.path.dirname(__file__)
-    agents[top_elite_index].save_model_weights(os.path.join(dirname,'evo_weights.h5'))
+    save_model_weights(model,os.path.join(dirname,'evo_weights.h5'))
     
-    child_agent = agents[top_elite_index].deep_copy()
+    child_agent = elite_agent.deep_copy(elite_agent.id)
     return child_agent
 
 def return_children(envs, agents, sorted_parent_indexes, elite_index):
@@ -260,7 +288,7 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 400
+    num_agents = 4
 
     agents = create_random_agents(num_agents, state_size, time_frame)
 
@@ -270,10 +298,12 @@ if __name__ == '__main__':
     weights_file=os.path.join(dirname,'evo_weights.h5')
     if os.path.exists(weights_file):
         print('loading existing weights')
-        agents[0].model.load_weights(weights_file)
+        model = build_compile_model(agents[0].state_size * agents[0].time_frame, agents[0].action_size)
+        model.load_weights(weights_file)
+        agents[0].weights = model.get_weights()
 
     # how many top agents to consider as parents
-    top_limit = 20
+    top_limit = 2
 
     # run evolution until x generations
     generations = 1000
@@ -281,7 +311,7 @@ if __name__ == '__main__':
     elite_index = None
 
     for generation in range(generations):
-        rewards= run_agents_n_times(envs,agents,5) # average of x times
+        rewards = run_agents_n_times(envs,agents,5) # average of x times
 
         # sort by rewards
         sorted_parent_indexes = np.argsort(rewards)[::-1][:top_limit]
