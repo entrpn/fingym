@@ -9,8 +9,6 @@ verify_ssl = true
 pytest = "*"
 pandas = "*"
 numpy = "*"
-tf-nightly = "*"
-ray = "*"
 
 [requires]
 python_version = "3.7"
