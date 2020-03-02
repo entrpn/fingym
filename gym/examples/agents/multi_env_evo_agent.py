@@ -24,12 +24,13 @@ from gym import gym
 
 import argparse
 import numpy as np
-print(np.version.version)
 
 import copy
 import os
 
 ray.init()
+
+NOISE = np.random.randn(250000000).astype(np.float32)
 
 envs = []
 spyEnv = gym.make('SPY-Daily-v0')
@@ -220,13 +221,13 @@ def mutate(agent):
             for i0 in range(weight.shape[0]):
                 for i1 in range(weight.shape[1]):
                     #print('flags: ', weight.flags)
-                    #weight.flags.writeable = True
-                    weight[i0,i1]+= mutation_power*np.random.randn()
+                    weight.flags.writeable = True
+                    weight[i0,i1]+= mutation_power*NOISE[np.random.randint(0,len(NOISE)-1)]
 
         if len(weight.shape) == 1:
             for i0 in range(weight.shape[0]):
-                #weight.flags.writeable = True
-                weight[i0]+= mutation_power*np.random.randn()
+                weight.flags.writeable = True
+                weight[i0]+= mutation_power*NOISE[np.random.randint(0,len(NOISE)-1)]
     
     child_agent.weights = weights
     return child_agent
@@ -288,7 +289,7 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 4
+    num_agents = 100
 
     agents = create_random_agents(num_agents, state_size, time_frame)
 
@@ -303,7 +304,7 @@ if __name__ == '__main__':
         agents[0].weights = model.get_weights()
 
     # how many top agents to consider as parents
-    top_limit = 2
+    top_limit = 10
 
     # run evolution until x generations
     generations = 1000
