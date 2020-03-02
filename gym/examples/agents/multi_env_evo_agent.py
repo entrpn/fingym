@@ -35,24 +35,24 @@ NOISE = np.random.randn(250000000).astype(np.float32)
 envs = []
 spyEnv = gym.make('SPY-Daily-v0')
 envs.append(spyEnv)
-# tslaEnv = gym.make('TSLA-Daily-v0')
-# envs.append(tslaEnv)
-# googlEnv = gym.make('GOOGL-Daily-v0')
-# envs.append(googlEnv)
-# cgcEnv = gym.make('CGC-Daily-v0')
-# envs.append(cgcEnv)
-# cronEnv = gym.make('CRON-Daily-v0')
-# envs.append(cronEnv)
-# baEnv = gym.make('BA-Daily-v0')
-# envs.append(baEnv)
-# amznEnv = gym.make('AMZN-Daily-v0')
-# envs.append(amznEnv)
-# amdEnv = gym.make('AMD-Daily-v0')
-# envs.append(amdEnv)
-# abbvEnv = gym.make('ABBV-Daily-v0')
-# envs.append(abbvEnv)
-# aaplEnv = gym.make('AAPL-Daily-v0')
-# envs.append(aaplEnv)
+tslaEnv = gym.make('TSLA-Daily-v0')
+envs.append(tslaEnv)
+googlEnv = gym.make('GOOGL-Daily-v0')
+envs.append(googlEnv)
+cgcEnv = gym.make('CGC-Daily-v0')
+envs.append(cgcEnv)
+cronEnv = gym.make('CRON-Daily-v0')
+envs.append(cronEnv)
+baEnv = gym.make('BA-Daily-v0')
+envs.append(baEnv)
+amznEnv = gym.make('AMZN-Daily-v0')
+envs.append(amznEnv)
+amdEnv = gym.make('AMD-Daily-v0')
+envs.append(amdEnv)
+abbvEnv = gym.make('ABBV-Daily-v0')
+envs.append(abbvEnv)
+aaplEnv = gym.make('AAPL-Daily-v0')
+envs.append(aaplEnv)
 
 def build_compile_model(input_size, output_size):
     import tensorflow as tf
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 100
+    num_agents = 400
 
     agents = create_random_agents(num_agents, state_size, time_frame)
 
@@ -304,7 +304,7 @@ if __name__ == '__main__':
         agents[0].weights = model.get_weights()
 
     # how many top agents to consider as parents
-    top_limit = 10
+    top_limit = 20
 
     # run evolution until x generations
     generations = 1000
