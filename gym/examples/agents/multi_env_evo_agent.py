@@ -28,31 +28,31 @@ import numpy as np
 import copy
 import os
 
-ray.init()
+ray.init(num_cpus=12)
 
 NOISE = np.random.randn(250000000).astype(np.float32)
 
 envs = []
 spyEnv = gym.make('SPY-Daily-v0')
 envs.append(spyEnv)
-tslaEnv = gym.make('TSLA-Daily-v0')
-envs.append(tslaEnv)
-googlEnv = gym.make('GOOGL-Daily-v0')
-envs.append(googlEnv)
-cgcEnv = gym.make('CGC-Daily-v0')
-envs.append(cgcEnv)
-cronEnv = gym.make('CRON-Daily-v0')
-envs.append(cronEnv)
-baEnv = gym.make('BA-Daily-v0')
-envs.append(baEnv)
-amznEnv = gym.make('AMZN-Daily-v0')
-envs.append(amznEnv)
-amdEnv = gym.make('AMD-Daily-v0')
-envs.append(amdEnv)
-abbvEnv = gym.make('ABBV-Daily-v0')
-envs.append(abbvEnv)
-aaplEnv = gym.make('AAPL-Daily-v0')
-envs.append(aaplEnv)
+# tslaEnv = gym.make('TSLA-Daily-v0')
+# envs.append(tslaEnv)
+# googlEnv = gym.make('GOOGL-Daily-v0')
+# envs.append(googlEnv)
+# cgcEnv = gym.make('CGC-Daily-v0')
+# envs.append(cgcEnv)
+# cronEnv = gym.make('CRON-Daily-v0')
+# envs.append(cronEnv)
+# baEnv = gym.make('BA-Daily-v0')
+# envs.append(baEnv)
+# amznEnv = gym.make('AMZN-Daily-v0')
+# envs.append(amznEnv)
+# amdEnv = gym.make('AMD-Daily-v0')
+# envs.append(amdEnv)
+# abbvEnv = gym.make('ABBV-Daily-v0')
+# envs.append(abbvEnv)
+# aaplEnv = gym.make('AAPL-Daily-v0')
+#envs.append(aaplEnv)
 
 def build_compile_model(input_size, output_size):
     import tensorflow as tf
@@ -178,14 +178,15 @@ def return_average_score(envs, agent, runs):
     model = build_compile_model(agent.state_size * agent.time_frame, agent.action_size)
     model.set_weights(agent.weights)
     score = 0
-    # print('***** agent {} score *****'.format(agent.id))
     for env in envs:
         envScore = 0
         for i in range(runs):
             envScore += run_agent(env, agent, model)
-        score += envScore/runs
+        envScore = envScore/runs
+        print('AGENT: {}, env: {}, score: {}'.format(agent.id, type(env).__name__,envScore))
+        score += envScore
     score = score/len(envs)
-    print('agent {} env {} total score: {}'.format(agent.id,type(env),score))
+    print('AGENT: {}, total score: {}'.format(agent.id,score))
     return agent, score
 
 def run_agents_n_times(envs, agents, runs):
@@ -244,11 +245,19 @@ def add_elite(envs, agents, sorted_parent_indexes, elite_index = None, only_cons
 
     futures = [return_average_score.remote(envs, agents[i],runs=5) for i in candidate_elite_index]
     results = ray.get(futures)
+    
+    dirname = os.path.dirname(__file__)
+
+    i = 0
+    
     for result in results:
         agent = result[0]
         score = result[1]
 
         print("Score for elite agent {} is {} ".format(agent.id,score))
+        model = build_compile_model(agent.state_size * agent.time_frame, agent.action_size)
+        model.set_weights(agent.weights)
+        save_model_weights(model,os.path.join(dirname,'evo_weights_' + str(i) + '.h5'))
 
         if(top_score is None):
             top_score = score
@@ -256,13 +265,10 @@ def add_elite(envs, agents, sorted_parent_indexes, elite_index = None, only_cons
         elif(score > top_score):
             top_score = score
             elite_agent = agent
+        
+        i+=1
             
     print("Elite selected has id ",elite_agent.id, " and score", top_score)
-
-    model = build_compile_model(elite_agent.state_size * elite_agent.time_frame, elite_agent.action_size)
-    model.set_weights(elite_agent.weights)
-    dirname = os.path.dirname(__file__)
-    save_model_weights(model,os.path.join(dirname,'evo_weights.h5'))
     
     child_agent = elite_agent.deep_copy(elite_agent.id)
     return child_agent
@@ -289,22 +295,23 @@ if __name__ == '__main__':
     print('state_size: ', state_size)
 
     time_frame = 30
-    num_agents = 400
+    num_agents = 4
 
     agents = create_random_agents(num_agents, state_size, time_frame)
 
     # first agent gets saved weights
     dirname = os.path.dirname(__file__)
-    os.path.join(dirname,'evo_weights.h5')
-    weights_file=os.path.join(dirname,'evo_weights.h5')
-    if os.path.exists(weights_file):
-        print('loading existing weights')
-        model = build_compile_model(agents[0].state_size * agents[0].time_frame, agents[0].action_size)
-        model.load_weights(weights_file)
-        agents[0].weights = model.get_weights()
 
     # how many top agents to consider as parents
-    top_limit = 20
+    top_limit = 2
+
+    for i in range (top_limit):
+        weights_file = os.path.join(dirname,'evo_weights_' + str(i) + '.h5')
+        if os.path.exists(weights_file):
+            print('loading existing weights')
+            model = build_compile_model(agents[0].state_size * agents[0].time_frame, agents[0].action_size)
+            model.load_weights(weights_file)
+            agents[i].weights = model.get_weights()
 
     # run evolution until x generations
     generations = 1000

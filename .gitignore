@@ -4,3 +4,5 @@
 *.h5
 
 dqn_model_weights
+
+*.lock
