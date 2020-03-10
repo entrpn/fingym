@@ -138,7 +138,7 @@ class Agent:
         # print('decision: ', decision)
         # print('buy: ', buy)
 
-        return [np.argmax(decision[0]), int(buy[0])]
+        return [np.argmax(decision[0]), min(self.max_shares_to_trade_at_once,max(int(buy[0]),0))]
     
     def fit(self, iterations, checkpoint):
         self.des.train(iterations, print_every = checkpoint)
