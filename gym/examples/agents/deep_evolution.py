@@ -2,7 +2,11 @@ import numpy as np
 from gym import gym
 from collections import deque
 
+import matplotlib.pyplot as plt
+
 import ray
+
+import os
 
 ray.init()
 
@@ -15,7 +19,8 @@ CONFIG = {
     'time_frame': 30,
     'sigma': 0.1,
     'learning_rate': 0.03,
-    'population_size': 15
+    'population_size': 400,
+    'iterations': 50
 }
 
 def get_state_as_change_percentage(state, next_state):
@@ -38,7 +43,7 @@ def reward_function(weights):
     return reward
     
 
-def run_agent(agent):
+def run_agent(agent,log_actions = False):
     env = CONFIG['env']
     state = env.reset()
     # Removed time element from state
@@ -59,12 +64,14 @@ def run_agent(agent):
     while not done:
         closes.append(state[5])
         action = agent.act(state_as_percentages)
+        if log_actions:
+            print('action: ',action)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
-        if action[0] == 1 and state[1] > next_state[2]:
+        if action[0] == 1 and action[1] > 0 and state[1] > next_state[2]:
             states_buy.append(i)
-        if action[0] == 2 and state[0] > 0:
+        if action[0] == 2 and action[1] > 0 and state[0] > 0:
             states_sell.append(i)
         state_as_percentages = get_state_as_change_percentage(state, next_state)
         state = next_state
@@ -88,7 +95,7 @@ class Deep_Evolution_Strategy:
     def get_weights(self):
         return self.weights
 
-    def train(self,epoch = 100, print_every=1):
+    def train(self,epoch = 500, print_every=1):
         for i in range(epoch):
             population = []
             rewards = np.zeros(self.population_size)
@@ -97,10 +104,6 @@ class Deep_Evolution_Strategy:
                 for w in self.weights:
                     x.append(np.random.randn(*w.shape))
                 population.append(x)
-            
-            # for k in range(self.population_size):
-            #     weights_population = self._get_weight_from_population(self.weights, population[k])
-            #     rewards[k] = reward_function(weights_population)
             
             futures = [reward_function.remote(self._get_weight_from_population(self.weights,population[k])) for k in range(self.population_size)]
 
@@ -151,12 +154,9 @@ class Model:
             np.random.randn(layer_size, 1),
             np.random.randn(1, layer_size)
         ]
-        #print('weights shape: ',len(self.weights))
     
     def predict(self, inputs):
         feed = np.dot(inputs, self.weights[0]) + self.weights[-1]
-        #print('feed shape: ',feed.shape)
-        #print('weights shape: ',len(self.weights))
         decision = np.dot(feed, self.weights[1])
         buy = np.dot(feed, self.weights[2])
         return decision, buy
@@ -169,8 +169,34 @@ class Model:
 
 if __name__ == '__main__':
 
+    train = False
+
     time_frame = CONFIG['time_frame']
     state_size = CONFIG['state_size']
+    
     model = Model(time_frame * state_size, 500, 3)
+
+    dirname = os.path.dirname(__file__)
+    weights_file = os.path.join(dirname,'deep_evo_weights.npy')
+
+    if os.path.exists(weights_file):
+        print('loading weights')
+        weights = np.load(weights_file,allow_pickle=True)
+        model.set_weights(weights)
+
+    # np.save(weights_file,model.get_weights())
     agent = Agent(model,state_size, time_frame)
-    agent.fit(iterations=500, checkpoint=10)
+    if train:
+        agent.fit(iterations=CONFIG['iterations'], checkpoint=10)
+        agent.model.set_weights(agent.des.get_weights())
+        np.save(weights_file, agent.des.get_weights())
+    
+    closes, states_buy, states_sell, result = run_agent(agent,log_actions=True)
+    
+    print('result: {}'.format(str(result)))
+    plt.figure(figsize = (20, 10))
+    plt.plot(closes, label = 'true close', c = 'g')
+    plt.plot(closes, 'X', label = 'predict buy', markevery = states_buy, c = 'b')
+    plt.plot(closes, 'o', label = 'predict sell', markevery = states_sell, c = 'r')
+    plt.legend()
+    plt.show()

@@ -8,7 +8,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-def run_agent(env, agent, model):
+def test_agent(env, agent, model):
 
     state = env.reset()
     # Removed time element from state
@@ -53,7 +53,7 @@ model.load_weights(weights_file)
 
 agent = EvoAgent(state_size, time_frame, model.get_weights())
 
-closes, states_buy, states_sell, result = run_agent(env,agent,model)
+closes, states_buy, states_sell, result = test_agent(env,agent,model)
 print('result: {}'.format(str(result)))
 plt.figure(figsize = (20, 10))
 plt.plot(closes, label = 'true close', c = 'g')
