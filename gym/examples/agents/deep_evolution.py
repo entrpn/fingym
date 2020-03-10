@@ -34,7 +34,7 @@ def reward_function(weights):
     model.set_weights(weights)
     agent = Agent(model,state_size, time_frame)
     _,_,_,reward = run_agent(agent)
-    #print('reward: ',reward)
+    print('reward: ',reward)
     return reward
     
 
@@ -59,7 +59,6 @@ def run_agent(agent):
     while not done:
         closes.append(state[5])
         action = agent.act(state_as_percentages)
-        print(action)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
