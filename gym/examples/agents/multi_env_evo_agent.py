@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # https://becominghuman.ai/genetic-algorithm-for-reinforcement-learning-a38a5612c4dc
+# https://gist.github.com/karpathy/77fbb6a8dac5395f1b73e7a89300318d
 
 
 from collections import deque
