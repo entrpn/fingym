@@ -34,7 +34,7 @@ def reward_function(weights):
     model.set_weights(weights)
     agent = Agent(model,state_size, time_frame)
     _,_,_,reward = run_agent(agent)
-    print('reward: ',reward)
+    #print('reward: ',reward)
     return reward
     
 
