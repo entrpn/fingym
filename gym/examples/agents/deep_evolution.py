@@ -20,7 +20,9 @@ CONFIG = {
     'sigma': 0.1,
     'learning_rate': 0.03,
     'population_size': 400,
-    'iterations': 50
+    'iterations': 50,
+    'train': True,
+    'eval': True
 }
 
 def get_state_as_change_percentage(state, next_state):
@@ -170,6 +172,7 @@ class Model:
 if __name__ == '__main__':
 
     train = False
+    eval = False
 
     time_frame = CONFIG['time_frame']
     state_size = CONFIG['state_size']
@@ -186,17 +189,17 @@ if __name__ == '__main__':
 
     # np.save(weights_file,model.get_weights())
     agent = Agent(model,state_size, time_frame)
-    if train:
+    if CONFIG['train']:
         agent.fit(iterations=CONFIG['iterations'], checkpoint=10)
         agent.model.set_weights(agent.des.get_weights())
         np.save(weights_file, agent.des.get_weights())
     
-    closes, states_buy, states_sell, result = run_agent(agent,log_actions=True)
-    
-    print('result: {}'.format(str(result)))
-    plt.figure(figsize = (20, 10))
-    plt.plot(closes, label = 'true close', c = 'g')
-    plt.plot(closes, 'X', label = 'predict buy', markevery = states_buy, c = 'b')
-    plt.plot(closes, 'o', label = 'predict sell', markevery = states_sell, c = 'r')
-    plt.legend()
-    plt.show()
+    if CONFIG['eval']:
+        closes, states_buy, states_sell, result = run_agent(agent,log_actions=True)
+        print('result: {}'.format(str(result)))
+        plt.figure(figsize = (20, 10))
+        plt.plot(closes, label = 'true close', c = 'g')
+        plt.plot(closes, 'X', label = 'predict buy', markevery = states_buy, c = 'b')
+        plt.plot(closes, 'o', label = 'predict sell', markevery = states_sell, c = 'r')
+        plt.legend()
+        plt.show()
