@@ -16,13 +16,15 @@ CONFIG = {
     'env': env,
     # removing time frame, stocks owned and cash in hand
     'state_size': env.state_dim - 3,
+    'max_shares_to_trade_at_once': 100,
     'time_frame': 30,
     'sigma': 0.1,
     'learning_rate': 0.03,
     'population_size': 400,
     'iterations': 50,
     'train': True,
-    'eval': True
+    'eval': True,
+    'log_actions': False
 }
 
 def get_state_as_change_percentage(state, next_state):
@@ -45,8 +47,9 @@ def reward_function(weights):
     return reward
     
 
-def run_agent(agent,log_actions = False):
+def run_agent(agent):
     env = CONFIG['env']
+    log_actions = CONFIG['log_actions']
     state = env.reset()
     # Removed time element from state
     state = np.delete(state, 2)
@@ -68,12 +71,20 @@ def run_agent(agent,log_actions = False):
         action = agent.act(state_as_percentages)
         if log_actions:
             print('action: ',action)
+            print('state: ',state)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
-        if action[0] == 1 and action[1] > 0 and state[1] > next_state[2]:
+        if action[0] == 1 and action[1] > 0 and state[1] > state[2]:
+            if log_actions:
+                print('stocks to buy: ',action[1])
+                print('stock price: ',state[2])
+                print('cash in hand: ',state[1])
             states_buy.append(i)
         if action[0] == 2 and action[1] > 0 and state[0] > 0:
+            if log_actions:
+                print('stocks owned: ',state[0])
+                print('stocks to sell: ',action[1])
             states_sell.append(i)
         state_as_percentages = get_state_as_change_percentage(state, next_state)
         state = next_state
@@ -127,7 +138,7 @@ class Agent:
         self.time_frame = time_frame
         self.state_size = state_size
         self.state_fifo = deque(maxlen=self.time_frame)
-        self.max_shares_to_trade_at_once = 100
+        self.max_shares_to_trade_at_once = CONFIG['max_shares_to_trade_at_once']
         self.des = Deep_Evolution_Strategy(self.model.get_weights())
     
     def act(self,state):
@@ -195,7 +206,7 @@ if __name__ == '__main__':
         np.save(weights_file, agent.des.get_weights())
     
     if CONFIG['eval']:
-        closes, states_buy, states_sell, result = run_agent(agent,log_actions=True)
+        closes, states_buy, states_sell, result = run_agent(agent)
         print('result: {}'.format(str(result)))
         plt.figure(figsize = (20, 10))
         plt.plot(closes, label = 'true close', c = 'g')
