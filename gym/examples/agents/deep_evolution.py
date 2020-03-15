@@ -13,7 +13,7 @@ ray.init()
 env = gym.make('SPY-Daily-v0')
 
 CONFIG = {
-    'env': env,
+    'env_name': 'SPY-Daily-v0',
     # removing time frame, stocks owned and cash in hand
     'state_size': env.state_dim - 3,
     'max_shares_to_trade_at_once': 100,
@@ -22,9 +22,9 @@ CONFIG = {
     'learning_rate': 0.03,
     'population_size': 400,
     'iterations': 50,
-    'train': True,
+    'train': False,
     'eval': True,
-    'log_actions': False
+    'log_actions': True
 }
 
 def get_state_as_change_percentage(state, next_state):
@@ -48,7 +48,7 @@ def reward_function(weights):
     
 
 def run_agent(agent):
-    env = CONFIG['env']
+    env = gym.make(CONFIG['env_name'])
     log_actions = CONFIG['log_actions']
     state = env.reset()
     # Removed time element from state
@@ -69,22 +69,27 @@ def run_agent(agent):
     while not done:
         closes.append(state[5])
         action = agent.act(state_as_percentages)
-        if log_actions:
-            print('action: ',action)
-            print('state: ',state)
+        #if log_actions:
+            #print('action: ',action)
+            #print('state: ',state)
         next_state, reward, done, info = env.step(action)
         if len(next_state) > agent.state_size:
             next_state = np.delete(next_state, 2)
         if action[0] == 1 and action[1] > 0 and state[1] > state[2]:
             if log_actions:
+                print('stocks owned: ',state[0])
                 print('stocks to buy: ',action[1])
                 print('stock price: ',state[2])
                 print('cash in hand: ',state[1])
+                print('total value: ',info['cur_val'])
             states_buy.append(i)
         if action[0] == 2 and action[1] > 0 and state[0] > 0:
             if log_actions:
                 print('stocks owned: ',state[0])
                 print('stocks to sell: ',action[1])
+                print('stock price: ',state[2])
+                print('cash in hand: ',state[1])
+                print('total value: ',info['cur_val'])
             states_sell.append(i)
         state_as_percentages = get_state_as_change_percentage(state, next_state)
         state = next_state
