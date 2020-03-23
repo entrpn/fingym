@@ -58,7 +58,7 @@ class EvoAgent():
 
         return new_agent
     
-    def act(self, state):
+    def act(self, state, model):
         self.state_fifo.append(state)
 
         # do nothing for the first time frames until we can start the prediction
@@ -68,11 +68,14 @@ class EvoAgent():
         state = np.array(list(self.state_fifo))
         state = np.reshape(state,(self.state_size*self.time_frame,1))
 
-        output_probabilities = self.model.predict_on_batch(state.T)[0]
-        #output_probabilities /= output_probabilities.sum()
-        #print('output_probabilities: ', output_probabilities)
-        action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
-        #print('action: ', action)
+        output_probabilities = model.predict_on_batch(state.T)[0]
+        output_probabilities = np.array(output_probabilities)
+        output_probabilities /= output_probabilities.sum()
+        try:
+            action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
+        except:
+            print('output probabilities: ', output_probabilities)
+            action = np.zeros(2)
         env_action = self._nn_action_to_env_action(action)
         return env_action
     
