@@ -1,5 +1,19 @@
+# Copyright 2020 The fingym Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import numpy as np
-from gym import gym
+from fingym import fingym
 from collections import deque
 
 import matplotlib.pyplot as plt
@@ -10,7 +24,7 @@ import os
 
 ray.init()
 
-env = gym.make('SPY-Daily-v0')
+env = fingym.make('SPY-Daily-v0')
 
 CONFIG = {
     'env_name': 'SPY-Daily-v0',
@@ -48,7 +62,7 @@ def reward_function(weights):
     
 
 def run_agent(agent):
-    env = gym.make(CONFIG['env_name'])
+    env = fingym.make(CONFIG['env_name'])
     log_actions = CONFIG['log_actions']
     state = env.reset()
     # Removed time element from state

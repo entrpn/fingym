@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.gym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv
+from fingym.gym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv
 
 import pytest
 

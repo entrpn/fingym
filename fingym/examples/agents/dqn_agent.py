@@ -18,7 +18,7 @@ import argparse
 import os
 import os.path
 
-from gym import gym
+from fingym import fingym
 
 import tensorflow as tf
 from tensorflow.keras.models import model_from_json
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     # train on this batch size
     batch_size = 32
 
-    env = gym.make(args.env_id)
+    env = fingym.make(args.env_id)
     # removing time element from state_dim since I'm creating a sequence via time_frame
     state_size = env.state_dim - 1
     print('state_size: ', state_size)

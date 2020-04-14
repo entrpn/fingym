@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.spy_envs import DailySpyEnv
+from fingym.envs.spy_envs import DailySpyEnv
+
 import os
 
-class AaplDailyEnv(DailySpyEnv):
+class TslaDailyEnv(DailySpyEnv):
     def __init__(self):
         super().__init__()
-
+    
     def _get_data_file(self):
-        return os.path.join(os.path.dirname(__file__),'..','data/filtered_aapl_data_10_yrs.csv')
+        return os.path.join(os.path.dirname(__file__),'..','data/filtered_tsla_data_10_yrs.csv')

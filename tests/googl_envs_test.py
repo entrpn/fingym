@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.googl_envs import GooglDailyEnv
+from fingym.envs.googl_envs import GooglDailyEnv
 
 import pytest
 

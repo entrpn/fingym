@@ -21,7 +21,7 @@ from collections import deque
 import uuid
 import ray
 
-from gym import gym
+from fingym import fingym
 
 import argparse
 import numpy as np
@@ -34,25 +34,25 @@ ray.init(num_cpus=12)
 NOISE = np.random.randn(250000000).astype(np.float32)
 
 envs = []
-spyEnv = gym.make('SPY-Daily-v0')
+spyEnv = fingym.make('SPY-Daily-v0')
 envs.append(spyEnv)
-# tslaEnv = gym.make('TSLA-Daily-v0')
+# tslaEnv = fingym.make('TSLA-Daily-v0')
 # envs.append(tslaEnv)
-# googlEnv = gym.make('GOOGL-Daily-v0')
+# googlEnv = fingym.make('GOOGL-Daily-v0')
 # envs.append(googlEnv)
-# cgcEnv = gym.make('CGC-Daily-v0')
+# cgcEnv = fingym.make('CGC-Daily-v0')
 # envs.append(cgcEnv)
-# cronEnv = gym.make('CRON-Daily-v0')
+# cronEnv = fingym.make('CRON-Daily-v0')
 # envs.append(cronEnv)
-# baEnv = gym.make('BA-Daily-v0')
+# baEnv = fingym.make('BA-Daily-v0')
 # envs.append(baEnv)
-# amznEnv = gym.make('AMZN-Daily-v0')
+# amznEnv = fingym.make('AMZN-Daily-v0')
 # envs.append(amznEnv)
-# amdEnv = gym.make('AMD-Daily-v0')
+# amdEnv = fingym.make('AMD-Daily-v0')
 # envs.append(amdEnv)
-# abbvEnv = gym.make('ABBV-Daily-v0')
+# abbvEnv = fingym.make('ABBV-Daily-v0')
 # envs.append(abbvEnv)
-# aaplEnv = gym.make('AAPL-Daily-v0')
+# aaplEnv = fingym.make('AAPL-Daily-v0')
 #envs.append(aaplEnv)
 
 def build_compile_model(input_size, output_size):

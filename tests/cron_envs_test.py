@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.cron_envs import CronDailyEnv
+from fingym.envs.cron_envs import CronDailyEnv
 
 import pytest
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.cgc_envs import CgcDailyEnv
+from fingym.envs.cgc_envs import CgcDailyEnv
 
 import pytest
 
