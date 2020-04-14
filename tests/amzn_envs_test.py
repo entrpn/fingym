@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.amzn_envs import AmznDailyEnv
+from fingym.envs.amzn_envs import AmznDailyEnv
 
 import pytest
 

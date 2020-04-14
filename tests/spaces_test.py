@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-from gym.spaces.space import BuyHoldSellSpace
+from fingym.spaces.space import BuyHoldSellSpace
 
 @pytest.fixture
 def buy_hold_sell_space():

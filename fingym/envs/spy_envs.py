@@ -20,7 +20,7 @@ from datetime import datetime
 import re
 
 from .env import Env
-from gym.spaces.space import BuyHoldSellSpace
+from fingym.spaces.space import BuyHoldSellSpace
 
 class SpyEnv(Env):
     def __init__(self):

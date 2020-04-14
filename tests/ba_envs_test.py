@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.ba_envs import BaDailyEnv
+from fingym.envs.ba_envs import BaDailyEnv
 
 import pytest
 

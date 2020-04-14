@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.tsla_envs import TslaDailyEnv
+from fingym.envs.tsla_envs import TslaDailyEnv
 import pytest
 
 @pytest.fixture

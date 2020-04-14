@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv
+from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv
 
 import pytest
 

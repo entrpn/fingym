@@ -14,7 +14,7 @@
 
 from __future__ import division
 import argparse
-from gym import gym
+from fingym import fingym
 
 class BuyAndHoldAgent(object):
     def __init__(self, action_space):
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('env_id', nargs='?', default='SPY-Daily-v0', help='Select the environment to run')
     args = parser.parse_args()
 
-    env = gym.make(args.env_id)
+    env = fingym.make(args.env_id)
     agent = BuyAndHoldAgent(env.action_space)
 
     reward = 0

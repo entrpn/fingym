@@ -24,7 +24,7 @@ from tensorflow.keras import Model, Sequential
 from tensorflow.keras.layers import Dense, Embedding, Reshape
 from tensorflow.keras.optimizers import Adam
 
-from gym import gym
+from fingym import fingym
 
 import argparse
 import numpy as np
@@ -58,7 +58,7 @@ class EvoAgent():
 
         return new_agent
     
-    def act(self, state):
+    def act(self, state, model):
         self.state_fifo.append(state)
 
         # do nothing for the first time frames until we can start the prediction
@@ -68,11 +68,14 @@ class EvoAgent():
         state = np.array(list(self.state_fifo))
         state = np.reshape(state,(self.state_size*self.time_frame,1))
 
-        output_probabilities = self.model.predict_on_batch(state.T)[0]
-        #output_probabilities /= output_probabilities.sum()
-        #print('output_probabilities: ', output_probabilities)
-        action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
-        #print('action: ', action)
+        output_probabilities = model.predict_on_batch(state.T)[0]
+        output_probabilities = np.array(output_probabilities)
+        output_probabilities /= output_probabilities.sum()
+        try:
+            action = np.random.choice(range(self.action_size),1,p=output_probabilities).item()
+        except:
+            print('output probabilities: ', output_probabilities)
+            action = np.zeros(2)
         env_action = self._nn_action_to_env_action(action)
         return env_action
     
@@ -148,6 +151,32 @@ def run_agents_n_times(env, agents, runs):
         avg_score.append(return_average_score(env, agent, runs))
     return avg_score
 
+def uniform_crossover(parentA, parentB):
+    print('crossover')
+    child_agent = parentA.deep_copy()
+
+    parentB_weights = parentB.model.get_weights()
+
+    weights = child_agent.model.get_weights()
+
+    for idx, weight in enumerate(weights):
+        
+        if len(weight.shape) == 2:
+            for i0 in range(weight.shape[0]):
+                for i1 in range(weight.shape[1]):
+                    if np.random.uniform() > 0.5:
+                        weight[i0,i1] = parentB_weights[idx][i0,i1]
+
+        if len(weight.shape) == 1:
+            for i0 in range(weight.shape[0]):
+                if np.random.uniform() > 0.5:
+                    weight[i0] = parentB_weights[idx][i0]
+
+    child_agent.model.set_weights(weights)
+    
+    return child_agent
+
+
 def mutate(agent):
     print('mutate')
     child_agent = agent.deep_copy()
@@ -183,7 +212,7 @@ def add_elite(env, agents, sorted_parent_indexes, elite_index = None, only_consi
     top_elite_index = None
     
     for i in candidate_elite_index:
-        score = return_average_score(env, agents[i],runs=5)
+        score = return_average_score(env, agents[i],runs=3)
         print("Score for elite i ", i, " is ", score)
         
         if(top_score is None):
@@ -204,8 +233,9 @@ def return_children(env, agents, sorted_parent_indexes, elite_index):
     children_agents = []
 
     for i in range(len(agents) -1):
-        selected_agent_index = sorted_parent_indexes[np.random.randint(len(sorted_parent_indexes))]
-        children_agents.append(mutate(agents[selected_agent_index]))
+        parentA = sorted_parent_indexes[np.random.randint(len(sorted_parent_indexes))]
+        parentB = sorted_parent_indexes[np.random.randint(len(sorted_parent_indexes))]
+        children_agents.append(mutate(uniform_crossover(agents[parentA], agents[parentB])))
         
     
     # now add one elite
@@ -220,7 +250,7 @@ if __name__ == '__main__':
     parser.add_argument('env_id', nargs='?', default='SPY-Daily-v0', help='Select the environment to run')
     args = parser.parse_args()
 
-    env = gym.make(args.env_id)
+    env = fingym.make(args.env_id)
 
     # removing time element from state_dim
     state_size = env.state_dim - 1
@@ -248,7 +278,7 @@ if __name__ == '__main__':
     elite_index = None
 
     for generation in range(generations):
-        rewards = run_agents_n_times(env,agents,5) # average of x times
+        rewards = run_agents_n_times(env,agents,3) # average of x times
 
         # sort by rewards
         sorted_parent_indexes = np.argsort(rewards)[::-1][:top_limit]

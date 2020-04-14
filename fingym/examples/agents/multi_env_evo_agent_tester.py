@@ -1,6 +1,6 @@
-from gym.examples.agents.multi_env_evo_agent import build_compile_model, EvoAgent
+from fingym.examples.agents.multi_env_evo_agent import build_compile_model, EvoAgent
 
-from gym import gym
+from fingym import fingym
 
 import os
 
@@ -41,7 +41,7 @@ def test_agent(env, agent, model):
         i+=1
     return closes, states_buy, states_sell, info['cur_val']
 
-env = gym.make('SPY-Daily-v0')
+env = fingym.make('SPY-Daily-v0')
 # removing time frame
 state_size = env.state_dim - 1
 time_frame = 30

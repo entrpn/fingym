@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.aapl_envs import AaplDailyEnv
+from fingym.envs.aapl_envs import AaplDailyEnv
 
 import pytest
 

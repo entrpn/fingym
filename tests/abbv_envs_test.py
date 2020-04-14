@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gym.envs.abbv_envs import AbbvDailyEnv
+from fingym.envs.abbv_envs import AbbvDailyEnv
 
 import pytest
 
