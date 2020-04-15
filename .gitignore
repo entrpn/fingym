@@ -6,3 +6,6 @@
 dqn_model_weights
 
 *.lock
+
+dist
+MANIFEST

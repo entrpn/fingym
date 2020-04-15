@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'fingym',
   packages = ['fingym'],
-  version = '0.1',
+  version = '0.2',
   license='apache-2.0',    
   description = 'A tool for developing reinforcement learning algorithms focused in stock prediction',
   author = 'Juan Acevedo',
@@ -18,7 +18,7 @@ setup(
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers', 
     'Topic :: Software Development :: Build Tools',
-    'License :: OSI Approved :: apache-2.0 License',
+    'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
