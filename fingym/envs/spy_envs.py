@@ -57,8 +57,8 @@ class SpyEnv(Env):
         prev_val = self._get_val()
         if self.cur_step < self.n_step -1:
             self.cur_step += 1
-        else:
-            print('WARNING - this environment is done')
+        # else:
+        #     print('WARNING - this environment is done')
         self._trade(action)
 
         # get the new value after taking the action
