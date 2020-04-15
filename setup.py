@@ -1,15 +1,22 @@
-from distutils.core import setup
+from setuptools import setup, find_packages, find_namespace_packages
+
+import sys, os.path
+
+# Don't import gym module here, since deps may not be installed
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'fingym'))
+
 setup(
   name = 'fingym',
-  packages = ['fingym'],
-  version = '0.2',
+  version = '0.3',
   license='apache-2.0',    
   description = 'A tool for developing reinforcement learning algorithms focused in stock prediction',
   author = 'Juan Acevedo',
   author_email = 'entrpn@gmail.com',
   url = 'https://github.com/entrpn/fingym/', 
   download_url = 'https://github.com/entrpn/fingym/archive/v0.1.tar.gz',
-  keywords = ['stock-market', 'stock-price-prediction', 'python','reinforcement-learning-environments','reinforcement-learning','reinforcement-learning-agents','artificial-intelligence','q-learning','evolution-strategies'],   # Keywords that define your package best
+  keywords = ['stock-market', 'stock-price-prediction', 'python','reinforcement-learning-environments','reinforcement-learning','reinforcement-learning-agents','artificial-intelligence','q-learning','evolution-strategies'],
+  packages=find_namespace_packages(),
+  package_data={'fingym': ['data/*.csv']},
   install_requires=[
           'pandas',
           'numpy',

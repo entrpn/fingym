@@ -9,3 +9,5 @@ dqn_model_weights
 
 dist
 MANIFEST
+*.egg-info
+build

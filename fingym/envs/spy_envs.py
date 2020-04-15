@@ -19,7 +19,7 @@ import sys
 from datetime import datetime
 import re
 
-from fingym.env import Env
+from fingym.envs.env import Env
 from fingym.spaces.space import BuyHoldSellSpace
 
 class SpyEnv(Env):
