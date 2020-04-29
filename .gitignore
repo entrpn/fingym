@@ -11,3 +11,5 @@ dist
 MANIFEST
 *.egg-info
 build
+
+Pipfile*

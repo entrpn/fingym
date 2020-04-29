@@ -42,9 +42,14 @@ You can perform a minimal install of ``fingym`` with:
     git clone git clone https://github.com/entrpn/fingym
     cd fingym
     pipenv shell
-    pipenv install
-    export PYTHONPATH=$PYTHONPATH:/path/to/fingym/fingym
+    pipenv install -e .
 
+If you prefer, you can do a minimal install of the packaged version directly from PyPI:
+
+.. code:: shell
+
+    pip install fingym
+    
 Environments
 ============
 
