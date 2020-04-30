@@ -26,7 +26,7 @@ def spy_intraday_minute_v0_env():
 
 @pytest.fixture
 def spy_daily_random_walk_env():
-    return SpyDailyRandomWalkEnv()
+    return SpyDailyRandomWalkEnv(222)
 
 def test_make_spy_daily_random_walk_env(spy_daily_random_walk_env):
     assert type(spy_daily_random_walk_env) == SpyDailyRandomWalkEnv

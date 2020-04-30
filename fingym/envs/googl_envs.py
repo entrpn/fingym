@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fingym.envs.spy_envs import DailySpyEnv
+from fingym.envs.spy_envs import DailySpyEnv, SpyDailyRandomWalkEnv
 import os
+
+class GooglDailyRandomWalkEnv(SpyDailyRandomWalkEnv):
+    def _get_data_file(self):
+        return os.path.join(os.path.dirname(__file__),'..','data/filtered_googl_data_10_yrs.csv') 
 
 class GooglDailyEnv(DailySpyEnv):
     def __init__(self):

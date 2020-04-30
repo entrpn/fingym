@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fingym.fingym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv, SpyDailyRandomWalkEnv
+from fingym.fingym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv, SpyDailyRandomWalkEnv, GooglDailyRandomWalkEnv, TslaDailyEnv, TslaDailyRandomWalkEnv
 
 import pytest
+
+@pytest.fixture
+def tsla_daily_v0_env():
+    return make('TSLA-Daily-v0')
+
+@pytest.fixture
+def tsla_daily_random_walk_env():
+    return make('TSLA-Daily-Random-Walk')
 
 @pytest.fixture
 def spy_daily_v0_env():
@@ -31,6 +39,10 @@ def spy_daily_random_walk_env():
 @pytest.fixture
 def googl_daily_v0_env():
     return make('GOOGL-Daily-v0')
+
+@pytest.fixture
+def googl_daily_random_walk_env():
+    return make('GOOGL-Daily-Random-Walk')
 
 @pytest.fixture
 def cron_daily_v0_env():
@@ -72,6 +84,9 @@ def test_make_spy_daily_random_walk(spy_daily_random_walk_env):
 def test_make_googl_daily_v0(googl_daily_v0_env):
     assert type(googl_daily_v0_env) == GooglDailyEnv
 
+def test_make_googl_daily_random_walk(googl_daily_random_walk_env):
+    assert type(googl_daily_random_walk_env) == GooglDailyRandomWalkEnv
+
 def test_make_cron_daily_v0(cron_daily_v0_env):
     assert type(cron_daily_v0_env) == CronDailyEnv
 
@@ -92,3 +107,9 @@ def test_make_abbv_daily_v0(abbv_daily_v0_env):
 
 def test_make_aapl_daily_v0(aapl_daily_v0_env):
     assert type(aapl_daily_v0_env) == AaplDailyEnv
+
+def test_make_tsla_daily_v0(tsla_daily_v0_env):
+    assert type(tsla_daily_v0_env) == TslaDailyEnv
+
+def test_make_tsla_daily_random_walk(tsla_daily_random_walk_env):
+    assert type(tsla_daily_random_walk_env) == TslaDailyRandomWalkEnv

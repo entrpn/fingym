@@ -158,9 +158,9 @@ class DailySpyEnv(SpyEnv):
         return os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
 
 class SpyDailyRandomWalkEnv(DailySpyEnv):
-    def __init__(self):
+    def __init__(self, no_days_to_random_walk):
 
-        self.no_days_to_random_walk = 222
+        self.no_days_to_random_walk = no_days_to_random_walk
         self.original_close = None
 
         super().__init__()

@@ -20,8 +20,8 @@ import re
 import sys
 import os
 from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv, SpyDailyRandomWalkEnv
-from fingym.envs.tsla_envs import TslaDailyEnv
-from fingym.envs.googl_envs import GooglDailyEnv
+from fingym.envs.tsla_envs import TslaDailyEnv, TslaDailyRandomWalkEnv
+from fingym.envs.googl_envs import GooglDailyEnv, GooglDailyRandomWalkEnv
 from fingym.envs.cgc_envs import CgcDailyEnv
 from fingym.envs.cron_envs import CronDailyEnv
 from fingym.envs.cgc_envs import CgcDailyEnv
@@ -31,17 +31,21 @@ from fingym.envs.amd_envs import AmdDailyEnv
 from fingym.envs.abbv_envs import AbbvDailyEnv
 from fingym.envs.aapl_envs import AaplDailyEnv
 
-def make(envName):
+def make(envName, no_days_to_random_walk=222):
     if envName == 'SPY-Daily-v0':
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
         return IntradaySpyEnv()
     if envName == 'SPY-Daily-Random-Walk':
-        return SpyDailyRandomWalkEnv()
+        return SpyDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'TSLA-Daily-v0':
         return TslaDailyEnv()
+    if envName == 'TSLA-Daily-Random-Walk':
+        return TslaDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'GOOGL-Daily-v0':
         return GooglDailyEnv()
+    if envName == 'GOOGL-Daily-Random-Walk':
+        return GooglDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'CGC-Daily-v0':
         return CgcDailyEnv()
     if envName == 'CRON-Daily-v0':
