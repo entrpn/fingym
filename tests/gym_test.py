@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fingym.gym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv
+from fingym.fingym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv, SpyDailyRandomWalkEnv
 
 import pytest
 
@@ -23,6 +23,10 @@ def spy_daily_v0_env():
 @pytest.fixture
 def spy_intraday_v0_env():
     return make('SPY-Minute-v0')
+
+@pytest.fixture
+def spy_daily_random_walk_env():
+    return make('SPY-Daily-Random-Walk')
 
 @pytest.fixture
 def googl_daily_v0_env():
@@ -61,6 +65,9 @@ def test_make_spy_daily_v0(spy_daily_v0_env):
 
 def test_make_spy_intraday_v0(spy_intraday_v0_env):
     assert type(spy_intraday_v0_env) == IntradaySpyEnv
+
+def test_make_spy_daily_random_walk(spy_daily_random_walk_env):
+    assert type(spy_daily_random_walk_env) == SpyDailyRandomWalkEnv
 
 def test_make_googl_daily_v0(googl_daily_v0_env):
     assert type(googl_daily_v0_env) == GooglDailyEnv

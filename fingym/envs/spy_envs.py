@@ -50,7 +50,7 @@ class SpyEnv(Env):
         self.cur_step = 0
         self.cash_in_hand = self.initial_investment
         self.stock_owned = 0
-        return self._get_obs() 
+        return self._get_obs()
 
     def step(self, action):
         
@@ -173,6 +173,10 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
         info['original_close'] = self._get_original_close_stock_price()
         return obs, reward, done, info
 
+    def reset(self):
+        self.headers, self.data = self._load_data()
+        return super().reset()
+
     def _get_geometric_brownian_motion(self, so, mu, sigma):
         drift = (mu - 0.5 * sigma**2)
         diffusion = sigma * np.random.normal()
@@ -193,8 +197,6 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
         for days in range(1,self.no_days_to_random_walk):
             next_day = self._get_geometric_brownian_motion(today, mu, sigma)
             df["sim"][df_len-self.no_days_to_random_walk+days] = next_day
-            print(df['close'][df_len-self.no_days_to_random_walk+days])
-            print(df['sim'][df_len-self.no_days_to_random_walk+days])
             today = next_day
 
         self._set_original_close_values(df['close'].values)

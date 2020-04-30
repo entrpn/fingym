@@ -52,9 +52,14 @@ def test_spy_daily_random_walk_reset(spy_daily_random_walk_env):
     assert observation[1] == 25000
     assert observation[3] == 86.16
 
-# def test_spy_daily_random_walk_step(spy_daily_random_walk_env):
-#     spy_daily_random_walk_env.reset()
-#     obs, reward, done, info = spy_daily_random_walk_env.step(spy_daily_random_walk_env.action_space.sample())
+def test_spy_daily_random_walk_step(spy_daily_random_walk_env):
+    spy_daily_random_walk_env.reset()
+    done = False
+    while not done:
+        obs, reward, done, info = spy_daily_random_walk_env.step(spy_daily_random_walk_env.action_space.sample())
+    
+    assert info['original_close'] == 321.22
+    
 
 def test_make_spy_intraday_v0_env(spy_intraday_minute_v0_env):
     assert type(spy_intraday_minute_v0_env) == IntradaySpyEnv

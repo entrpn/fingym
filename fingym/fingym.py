@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 import re
 import sys
 import os
-from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv
+from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv, SpyDailyRandomWalkEnv
 from fingym.envs.tsla_envs import TslaDailyEnv
 from fingym.envs.googl_envs import GooglDailyEnv
 from fingym.envs.cgc_envs import CgcDailyEnv
@@ -36,6 +36,8 @@ def make(envName):
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
         return IntradaySpyEnv()
+    if envName == 'SPY-Daily-Random-Walk':
+        return SpyDailyRandomWalkEnv()
     if envName == 'TSLA-Daily-v0':
         return TslaDailyEnv()
     if envName == 'GOOGL-Daily-v0':
