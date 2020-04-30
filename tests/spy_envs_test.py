@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv
+from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv, SpyDailyRandomWalkEnv
 
 import pytest
 
@@ -23,6 +23,38 @@ def spy_daily_v0_env():
 @pytest.fixture
 def spy_intraday_minute_v0_env():
     return IntradaySpyEnv()
+
+@pytest.fixture
+def spy_daily_random_walk_env():
+    return SpyDailyRandomWalkEnv()
+
+def test_make_spy_daily_random_walk_env(spy_daily_random_walk_env):
+    assert type(spy_daily_random_walk_env) == SpyDailyRandomWalkEnv
+
+def test_spy_daily_random_walk_init_values(spy_daily_random_walk_env):
+    assert spy_daily_random_walk_env.cur_step == 0
+    assert spy_daily_random_walk_env.n_step == len(spy_daily_random_walk_env.data)
+    assert spy_daily_random_walk_env.initial_investment == 25000
+    assert spy_daily_random_walk_env.cash_in_hand == spy_daily_random_walk_env.initial_investment
+    assert spy_daily_random_walk_env.stock_owned == 0
+    assert len(spy_daily_random_walk_env.headers) == 2
+    assert spy_daily_random_walk_env.state_dim == 4
+    assert spy_daily_random_walk_env._close_idx == 1
+    assert spy_daily_random_walk_env._open_idx == 1
+
+def test_spy_daily_random_walk_reset(spy_daily_random_walk_env):
+    observation = spy_daily_random_walk_env.reset()
+    assert spy_daily_random_walk_env.cur_step == 0
+    assert spy_daily_random_walk_env.cash_in_hand == spy_daily_random_walk_env.initial_investment
+    assert spy_daily_random_walk_env.stock_owned == 0
+    assert len(observation) == spy_daily_random_walk_env.state_dim
+    assert observation[0] == 0
+    assert observation[1] == 25000
+    assert observation[3] == 86.16
+
+# def test_spy_daily_random_walk_step(spy_daily_random_walk_env):
+#     spy_daily_random_walk_env.reset()
+#     obs, reward, done, info = spy_daily_random_walk_env.step(spy_daily_random_walk_env.action_space.sample())
 
 def test_make_spy_intraday_v0_env(spy_intraday_minute_v0_env):
     assert type(spy_intraday_minute_v0_env) == IntradaySpyEnv

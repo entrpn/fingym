@@ -157,6 +157,71 @@ class DailySpyEnv(SpyEnv):
     def _get_data_file(self):
         return os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
 
+class SpyDailyRandomWalkEnv(DailySpyEnv):
+    def __init__(self):
+
+        self.no_days_to_random_walk = 222
+        self.original_close = None
+
+        super().__init__()
+
+        self._close_idx = 1
+        self._open_idx = self._close_idx
+    
+    def step(self, action):
+        obs, reward, done, info = super().step(action)
+        info['original_close'] = self._get_original_close_stock_price()
+        return obs, reward, done, info
+
+    def _get_geometric_brownian_motion(self, so, mu, sigma):
+        drift = (mu - 0.5 * sigma**2)
+        diffusion = sigma * np.random.normal()
+        return so*np.exp(drift + diffusion)
+    
+    def _load_data(self):
+        data_file = self._get_data_file()
+        df = pd.read_csv(data_file)
+        df = df.drop(['open','high','low','volume'], axis = 1)
+        
+        df['daily_pct_change'] = df['close'].pct_change()
+        mu = df['daily_pct_change'].iloc[:-self.no_days_to_random_walk].mean()
+        sigma = df['daily_pct_change'].iloc[:-self.no_days_to_random_walk].std()
+
+        today = df['close'].values[-self.no_days_to_random_walk]
+        df['sim'] = df['close']
+        df_len = df.shape[0]
+        for days in range(1,self.no_days_to_random_walk):
+            next_day = self._get_geometric_brownian_motion(today, mu, sigma)
+            df["sim"][df_len-self.no_days_to_random_walk+days] = next_day
+            print(df['close'][df_len-self.no_days_to_random_walk+days])
+            print(df['sim'][df_len-self.no_days_to_random_walk+days])
+            today = next_day
+
+        self._set_original_close_values(df['close'].values)
+
+        df = df.drop(['close','daily_pct_change'], axis = 1)
+
+        return df.columns.values, df.values
+
+    def _set_original_close_values(self, original_close):
+        self.original_close = original_close
+    
+    def _get_original_close_stock_price(self):
+        return self.original_close[self.cur_step]
+
+    def _get_obs(self):
+        """
+        Return array with number stock owned, stock price and cash in hand.
+        Ex: [stock_owned, cash_in_hand, date, hclo, volume]
+        """
+        obs = np.empty(self.state_dim)
+        obs[0] = self.stock_owned
+        obs[1] = self.cash_in_hand
+        # date
+        obs[2] = self._convert_date_str_to_datetime(self.data[self.cur_step][0]).timestamp()
+        obs[3] = self.data[self.cur_step][-1]
+        return obs
+
 class IntradaySpyEnv(SpyEnv):
     def __init__(self):
         self.date_str_format = '%Y-%m-%d %H:%M:%S%z'
