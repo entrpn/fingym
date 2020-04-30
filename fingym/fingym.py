@@ -22,14 +22,13 @@ import os
 from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv, SpyDailyRandomWalkEnv
 from fingym.envs.tsla_envs import TslaDailyEnv, TslaDailyRandomWalkEnv
 from fingym.envs.googl_envs import GooglDailyEnv, GooglDailyRandomWalkEnv
-from fingym.envs.cgc_envs import CgcDailyEnv
-from fingym.envs.cron_envs import CronDailyEnv
-from fingym.envs.cgc_envs import CgcDailyEnv
-from fingym.envs.ba_envs import BaDailyEnv
-from fingym.envs.amzn_envs import AmznDailyEnv
-from fingym.envs.amd_envs import AmdDailyEnv
-from fingym.envs.abbv_envs import AbbvDailyEnv
-from fingym.envs.aapl_envs import AaplDailyEnv
+from fingym.envs.cgc_envs import CgcDailyEnv, CgcDailyRandomWalkEnv
+from fingym.envs.cron_envs import CronDailyEnv, CronDailyRandomWalkEnv
+from fingym.envs.ba_envs import BaDailyEnv, BaDailyRandomWalkEnv
+from fingym.envs.amzn_envs import AmznDailyEnv, AmznDailyRandomWalkEnv
+from fingym.envs.amd_envs import AmdDailyEnv, AmdDailyRandomWalkEnv
+from fingym.envs.abbv_envs import AbbvDailyEnv, AbbvDailyRandomWalkEnv
+from fingym.envs.aapl_envs import AaplDailyEnv, ApplDailyRandomWalkEnv
 
 def make(envName, no_days_to_random_walk=222):
     if envName == 'SPY-Daily-v0':
@@ -48,17 +47,31 @@ def make(envName, no_days_to_random_walk=222):
         return GooglDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'CGC-Daily-v0':
         return CgcDailyEnv()
+    if envName == 'CGC-Daily-Random-Walk':
+        return CgcDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'CRON-Daily-v0':
         return CronDailyEnv()
+    if envName == 'CRON-Daily-Random-Walk':
+        return CronDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'BA-Daily-v0':
         return BaDailyEnv()
+    if envName == 'BA-Daily-Random-Walk':
+        return BaDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'AMZN-Daily-v0':
         return AmznDailyEnv()
+    if envName == 'AMZN-Daily-Random-Walk':
+        return AmznDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'AMD-Daily-v0':
         return AmdDailyEnv()
+    if envName == 'AMD-Daily-Random-Walk':
+        return AmdDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'ABBV-Daily-v0':
         return AbbvDailyEnv()
+    if envName == 'ABBV-Daily-Random-Walk':
+        return AbbvDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'AAPL-Daily-v0':
         return AaplDailyEnv()
+    if envName == 'AAPL-Daily-Random-Walk':
+        return ApplDailyRandomWalkEnv(no_days_to_random_walk)
     else:
         raise NotImplementedError

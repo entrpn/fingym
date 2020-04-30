@@ -12,9 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fingym.fingym import make, DailySpyEnv, IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, CgcDailyEnv, BaDailyEnv, AmznDailyEnv, AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv, SpyDailyRandomWalkEnv, GooglDailyRandomWalkEnv, TslaDailyEnv, TslaDailyRandomWalkEnv
+from fingym.fingym import (make, DailySpyEnv, 
+    IntradaySpyEnv, GooglDailyEnv, CronDailyEnv, 
+    CgcDailyEnv, BaDailyEnv, AmznDailyEnv, 
+    AmdDailyEnv, AbbvDailyEnv, AaplDailyEnv, 
+    SpyDailyRandomWalkEnv, GooglDailyRandomWalkEnv, 
+    TslaDailyEnv, TslaDailyRandomWalkEnv, CronDailyRandomWalkEnv,
+    CgcDailyRandomWalkEnv, BaDailyRandomWalkEnv, AmznDailyRandomWalkEnv,
+    AmdDailyRandomWalkEnv, AbbvDailyRandomWalkEnv, ApplDailyRandomWalkEnv)
 
 import pytest
+
+@pytest.fixture
+def aapl_daily_random_walk_env():
+    return make('AAPL-Daily-Random-Walk')
+
+@pytest.fixture
+def abbv_daily_random_walk_env():
+    return make('ABBV-Daily-Random-Walk')
+
+@pytest.fixture
+def amd_daily_random_walk_env():
+    return make('AMD-Daily-Random-Walk')
+
+@pytest.fixture
+def amzn_daily_random_walk_env():
+    return make('AMZN-Daily-Random-Walk')
+
+@pytest.fixture
+def ba_daily_random_walk_env():
+    return make('BA-Daily-Random-Walk')
+
+@pytest.fixture
+def cgc_daily_random_walk_env():
+    return make('CGC-Daily-Random-Walk')
+
+@pytest.fixture
+def cron_daily_random_walk_env():
+    return make('CRON-Daily-Random-Walk')
 
 @pytest.fixture
 def tsla_daily_v0_env():
@@ -113,3 +148,24 @@ def test_make_tsla_daily_v0(tsla_daily_v0_env):
 
 def test_make_tsla_daily_random_walk(tsla_daily_random_walk_env):
     assert type(tsla_daily_random_walk_env) == TslaDailyRandomWalkEnv
+
+def test_make_cron_daily_random_walk(cron_daily_random_walk_env):
+    assert type(cron_daily_random_walk_env) == CronDailyRandomWalkEnv
+
+def test_make_cgc_daily_random_walk(cgc_daily_random_walk_env):
+    assert type(cgc_daily_random_walk_env) == CgcDailyRandomWalkEnv
+
+def test_make_ba_daily_random_walk(ba_daily_random_walk_env):
+    assert type(ba_daily_random_walk_env) == BaDailyRandomWalkEnv
+
+def test_make_amzn_daily_random_walk(amzn_daily_random_walk_env):
+    assert type(amzn_daily_random_walk_env) == AmznDailyRandomWalkEnv
+
+def test_make_amd_daily_random_walk(amd_daily_random_walk_env):
+    assert type(amd_daily_random_walk_env) == AmdDailyRandomWalkEnv
+
+def test_make_abbv_daily_random_walk(abbv_daily_random_walk_env):
+    assert type(abbv_daily_random_walk_env) == AbbvDailyRandomWalkEnv
+
+def test_make_aapl_daily_random_walk(aapl_daily_random_walk_env):
+    assert type(aapl_daily_random_walk_env) == ApplDailyRandomWalkEnv
