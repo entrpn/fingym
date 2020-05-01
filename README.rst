@@ -97,3 +97,4 @@ What's new
 - 2020-02-05: First release. 3 year spy intraday minute steps. 10 year daily steps.
 - 2020-02-26: More environments from different symbols.
 - 2020-04-14: Renamed package from `gym` to `fingym`
+- 2020-05-01: Added random walk environments and alphavantage environment.

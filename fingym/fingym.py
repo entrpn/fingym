@@ -78,9 +78,6 @@ def make(envName, alphavantage_stock = None, alphavantage_key = None, no_days_to
     if envName == 'AAPL-Daily-Random-Walk':
         return ApplDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'Alphavantage-Daily-v0':
-        try:
-            return AlphavantageDailyEnv(alphavantage_stock, alphavantage_key)
-        except:
-            print('ERROR - To use the Alphavantage environment please install the alpha_vantage pypi package')
+        return AlphavantageDailyEnv(alphavantage_stock, alphavantage_key)
     else:
         raise NotImplementedError
