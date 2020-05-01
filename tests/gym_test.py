@@ -19,7 +19,7 @@ from fingym.fingym import (make, DailySpyEnv,
     SpyDailyRandomWalkEnv, GooglDailyRandomWalkEnv, 
     TslaDailyEnv, TslaDailyRandomWalkEnv, CronDailyRandomWalkEnv,
     CgcDailyRandomWalkEnv, BaDailyRandomWalkEnv, AmznDailyRandomWalkEnv,
-    AmdDailyRandomWalkEnv, AbbvDailyRandomWalkEnv, ApplDailyRandomWalkEnv)
+    AmdDailyRandomWalkEnv, AbbvDailyRandomWalkEnv, ApplDailyRandomWalkEnv, AlphavantageDailyEnv)
 
 import pytest
 

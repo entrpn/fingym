@@ -29,8 +29,12 @@ from fingym.envs.amzn_envs import AmznDailyEnv, AmznDailyRandomWalkEnv
 from fingym.envs.amd_envs import AmdDailyEnv, AmdDailyRandomWalkEnv
 from fingym.envs.abbv_envs import AbbvDailyEnv, AbbvDailyRandomWalkEnv
 from fingym.envs.aapl_envs import AaplDailyEnv, ApplDailyRandomWalkEnv
+try:
+    from fingym.envs.alphavantage_envs import AlphavantageDailyEnv
+except:
+    pass
 
-def make(envName, no_days_to_random_walk=222):
+def make(envName, alphavantage_stock = None, alphavantage_key = None, no_days_to_random_walk=222):
     if envName == 'SPY-Daily-v0':
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
@@ -73,5 +77,10 @@ def make(envName, no_days_to_random_walk=222):
         return AaplDailyEnv()
     if envName == 'AAPL-Daily-Random-Walk':
         return ApplDailyRandomWalkEnv(no_days_to_random_walk)
+    if envName == 'Alphavantage-Daily-v0':
+        try:
+            return AlphavantageDailyEnv(alphavantage_stock, alphavantage_key)
+        except:
+            print('ERROR - To use the Alphavantage environment please install the alpha_vantage pypi package')
     else:
         raise NotImplementedError
