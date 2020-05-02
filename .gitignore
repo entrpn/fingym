@@ -3,8 +3,6 @@
 .vscode
 *.h5
 
-dqn_model_weights
-
 *.lock
 
 dist
@@ -13,3 +11,13 @@ MANIFEST
 build
 
 Pipfile*
+
+fingym/data/**20.csv
+fingym/data/**cci.csv
+fingym/data/**daily.csv
+fingym/data/**obv.csv
+fingym/data/**rsi.csv
+fingym/data/**9.csv
+fingym/data/**50.csv
+fingym/data/**200.csv
+

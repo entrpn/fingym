@@ -30,7 +30,7 @@ from fingym.envs.amd_envs import AmdDailyEnv, AmdDailyRandomWalkEnv
 from fingym.envs.abbv_envs import AbbvDailyEnv, AbbvDailyRandomWalkEnv
 from fingym.envs.aapl_envs import AaplDailyEnv, ApplDailyRandomWalkEnv
 try:
-    from fingym.envs.alphavantage_envs import AlphavantageDailyEnv
+    from fingym.envs.alphavantage_envs import AlphavantageDailyEnv, AlphavantageDailyRandomWalkEnv
 except:
     pass
 
@@ -79,5 +79,7 @@ def make(envName, alphavantage_stock = None, alphavantage_key = None, no_days_to
         return ApplDailyRandomWalkEnv(no_days_to_random_walk)
     if envName == 'Alphavantage-Daily-v0':
         return AlphavantageDailyEnv(alphavantage_stock, alphavantage_key)
+    if envName == 'Alphavantage-Daily-Random-Walk':
+        return AlphavantageDailyRandomWalkEnv(alphavantage_stock, alphavantage_key, no_days_to_random_walk)
     else:
         raise NotImplementedError

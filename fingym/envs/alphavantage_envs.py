@@ -266,3 +266,71 @@ class AlphaVantageService():
         self.isDownloadData = False
     
     return pd.read_csv(csv_path).to_numpy()
+
+class AlphavantageDailyRandomWalkEnv(AlphavantageDailyEnv):
+  def __init__(self, symbol, alphavantage_key, no_days_to_random_walk, update_data = False):
+    self.no_days_to_random_walk = no_days_to_random_walk
+    self.original_close = None
+
+    super().__init__(symbol=symbol, alphavantage_key=alphavantage_key, update_data=update_data)
+
+    self._close_idx = 1
+    self._open_idx = self._close_idx
+  
+  def step(self, action):
+    obs, reward, done, info = super().step(action)
+    info['original_close'] = self._get_original_close_stock_price()
+    return obs, reward, done, info
+
+  def reset(self):
+    self.data = self._load_data()
+    return super().reset()
+  
+  def _get_geometric_brownian_motion(self, so, mu, sigma):
+      drift = (mu - 0.5 * sigma**2)
+      diffusion = sigma * np.random.normal()
+      return so*np.exp(drift + diffusion)
+    
+  def _load_data(self):
+      super()._load_data()
+      csv_path = data_folder+f'{self.symbol}_daily.csv'
+      df = pd.read_csv(csv_path)
+      # date,1. open,2. high,3. low,4. close,5. volume
+      df = df.drop(['1. open','2. high','3. low','5. volume'], axis = 1)
+      
+      df['daily_pct_change'] = df['4. close'].pct_change()
+      mu = df['daily_pct_change'].iloc[:-self.no_days_to_random_walk].mean()
+      sigma = df['daily_pct_change'].iloc[:-self.no_days_to_random_walk].std()
+
+      today = df['4. close'].values[-self.no_days_to_random_walk]
+      df['sim'] = df['4. close']
+      df_len = df.shape[0]
+      for days in range(1,self.no_days_to_random_walk):
+          next_day = self._get_geometric_brownian_motion(today, mu, sigma)
+          df["sim"][df_len-self.no_days_to_random_walk+days] = next_day
+          today = next_day
+
+      self._set_original_close_values(df['4. close'].values)
+
+      df = df.drop(['4. close','daily_pct_change'], axis = 1)
+
+      return df.values
+
+  def _set_original_close_values(self, original_close):
+      self.original_close = original_close
+  
+  def _get_original_close_stock_price(self):
+      return self.original_close[self.cur_step]
+
+  def _get_obs(self):
+      """
+      Return array with number stock owned, stock price and cash in hand.
+      Ex: [stock_owned, cash_in_hand, date, hclo, volume]
+      """
+      obs = np.empty(self.state_dim)
+      obs[0] = self.stock_owned
+      obs[1] = self.cash_in_hand
+      # date
+      obs[2] = self._convert_date_str_to_datetime(self.data[self.cur_step][0])
+      obs[3] = self.data[self.cur_step][-1]
+      return obs
