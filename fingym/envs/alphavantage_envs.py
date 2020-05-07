@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import datetime
 import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
 import numpy as np
 import time
 

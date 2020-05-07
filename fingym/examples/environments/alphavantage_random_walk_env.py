@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-  env = make('Alphavantage-Daily-Random-Walk',alphavantage_stock='SPY', alphavantage_key = '', no_days_to_random_walk=1000)
+  env = make('Alphavantage-Daily-Random-Walk',stock_symbol='SPY', alphavantage_key = '', no_days_to_random_walk=1000)
 
   random_walks = []
 
@@ -16,11 +16,12 @@ if __name__ == '__main__':
     random_walk[0] = obs[3]
 
     while True:
-      obs, reward, done, info = env.step([0,0])
+      obs, reward, done, info = env.step([1,1000])
       real_close[env.cur_step] = info['original_close']
       random_walk[env.cur_step] = obs[3]
 
       if done:
+        print('total reward: {}'.format(info['cur_val']))
         break
 
     random_walks.append(random_walk)

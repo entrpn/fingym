@@ -1,6 +1,9 @@
 FinGym
 **********
 
+.. image:: https://badge.fury.io/py/fingym.svg
+    :target: https://badge.fury.io/py/fingym
+
 **Fingym is a toolkit for developing reinforcement learning algorithms tailored specifically for stock market trading.**  This is the ``fingym`` open-source library, which gives you access to a standardized set of environments.
 
 `See What's New section below <#what-s-new>`_
@@ -9,6 +12,9 @@ FinGym
 
 If you're not sure where to start, we recommend beginning with the
 `docs <https://entrpn.github.io/fingym/>`_ on our site.
+
+.. contents:: **Contents of this document**
+   :depth: 2
 
 Basics
 ======
@@ -98,3 +104,4 @@ What's new
 - 2020-02-26: More environments from different symbols.
 - 2020-04-14: Renamed package from `gym` to `fingym`
 - 2020-05-01: Added random walk environments and alphavantage environment.
+- 2020-05-07: Added IEX environment with caching to reduce consumption of message quotes.

@@ -19,6 +19,12 @@ from datetime import datetime, timedelta
 import re
 import sys
 import os
+
+from fingym.logger import create_logger
+logger = create_logger("fingym")
+
+import traceback
+
 from fingym.envs.spy_envs import DailySpyEnv, IntradaySpyEnv, SpyDailyRandomWalkEnv
 from fingym.envs.tsla_envs import TslaDailyEnv, TslaDailyRandomWalkEnv
 from fingym.envs.googl_envs import GooglDailyEnv, GooglDailyRandomWalkEnv
@@ -29,12 +35,22 @@ from fingym.envs.amzn_envs import AmznDailyEnv, AmznDailyRandomWalkEnv
 from fingym.envs.amd_envs import AmdDailyEnv, AmdDailyRandomWalkEnv
 from fingym.envs.abbv_envs import AbbvDailyEnv, AbbvDailyRandomWalkEnv
 from fingym.envs.aapl_envs import AaplDailyEnv, ApplDailyRandomWalkEnv
+
+alphavantage_exc_info = None
 try:
     from fingym.envs.alphavantage_envs import AlphavantageDailyEnv, AlphavantageDailyRandomWalkEnv
 except:
+    alphavantage_exc_info = sys.exc_info()
     pass
 
-def make(envName, alphavantage_stock = None, alphavantage_key = None, no_days_to_random_walk=222):
+iex_exc_info = None
+try:
+    from fingym.envs.iex_cloud_envs import IEXCloudDailyEnv
+except:
+    iex_exc_info = sys.exc_info()
+    pass
+
+def make(envName, stock_symbol = None, alphavantage_key = None, no_days_to_random_walk=222, iex_token = None, iex_start = None, iex_end = None):
     if envName == 'SPY-Daily-v0':
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
@@ -77,9 +93,25 @@ def make(envName, alphavantage_stock = None, alphavantage_key = None, no_days_to
         return AaplDailyEnv()
     if envName == 'AAPL-Daily-Random-Walk':
         return ApplDailyRandomWalkEnv(no_days_to_random_walk)
-    if envName == 'Alphavantage-Daily-v0':
-        return AlphavantageDailyEnv(alphavantage_stock, alphavantage_key)
-    if envName == 'Alphavantage-Daily-Random-Walk':
-        return AlphavantageDailyRandomWalkEnv(alphavantage_stock, alphavantage_key, no_days_to_random_walk)
+
+    try:
+        if envName == 'Alphavantage-Daily-v0':
+            return AlphavantageDailyEnv(stock_symbol, alphavantage_key)
+        if envName == 'Alphavantage-Daily-Random-Walk':
+            return AlphavantageDailyRandomWalkEnv(stock_symbol, alphavantage_key, no_days_to_random_walk)
+    except:
+        if alphavantage_exc_info:
+            traceback.print_exception(*alphavantage_exc_info)
+        else:
+            traceback.print_exc()
+
+    if envName == 'IEXCloud-Daily-v0':
+        try:
+            return IEXCloudDailyEnv(stock_symbol, iex_start, iex_end, iex_token)
+        except:
+            if iex_exc_info:
+                traceback.print_exception(*iex_exc_info)
+            else:
+                traceback.print_exc()
     else:
         raise NotImplementedError
