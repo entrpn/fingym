@@ -7,13 +7,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'fingym'))
 
 setup(
   name = 'fingym',
-  version = '0.7',
+  version = '1.0',
   license='apache-2.0',    
   description = 'A tool for developing reinforcement learning algorithms focused in stock prediction',
   author = 'Juan Acevedo',
   author_email = 'entrpn@gmail.com',
   url = 'https://github.com/entrpn/fingym/', 
-  download_url = 'https://github.com/entrpn/fingym/archive/v0.7.tar.gz',
+  download_url = 'https://github.com/entrpn/fingym/archive/v1.0.tar.gz',
   keywords = ['stock-market', 'stock-price-prediction', 'python','reinforcement-learning-environments','reinforcement-learning','reinforcement-learning-agents','artificial-intelligence','q-learning','evolution-strategies'],
   packages=find_namespace_packages(),
   package_data={'fingym': ['data/*.csv']},
