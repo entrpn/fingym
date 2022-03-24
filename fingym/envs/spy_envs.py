@@ -158,10 +158,11 @@ class DailySpyEnv(SpyEnv):
         return os.path.join(os.path.dirname(__file__),'..','data/filtered_spy_data_10_yrs.csv')
 
 class SpyDailyRandomWalkEnv(DailySpyEnv):
-    def __init__(self, no_days_to_random_walk):
+    def __init__(self, no_days_to_random_walk,only_random_walk=False):
 
         self.no_days_to_random_walk = no_days_to_random_walk
         self.original_close = None
+        self.only_random_walk = only_random_walk
 
         super().__init__()
 
@@ -182,7 +183,7 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
         diffusion = sigma * np.random.normal()
         return so*np.exp(drift + diffusion)
     
-    def _load_data(self):
+    def _load_random_walk_w_prev_values(self):
         data_file = self._get_data_file()
         df = pd.read_csv(data_file)
         df = df.drop(['open','high','low','volume'], axis = 1)
@@ -204,6 +205,35 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
         df = df.drop(['close','daily_pct_change'], axis = 1)
 
         return df.columns.values, df.values
+    
+    def _load_only_random_walk(self):
+        data_file = self._get_data_file()
+        df = pd.read_csv(data_file)
+        df = df.drop(['open','high','low','volume'], axis = 1)
+        
+        df['daily_pct_change'] = df['close'].pct_change()
+        mu = df['daily_pct_change'].mean()
+        sigma = df['daily_pct_change'].std()
+
+        today = df['close'].values[-1]
+        df['sim'] = df['close']
+        #df_len = df.shape[0]
+        for days in range(self.no_days_to_random_walk):
+            next_day = self._get_geometric_brownian_motion(today, mu, sigma)
+            df["sim"][days] = next_day
+            today = next_day
+
+        self._set_original_close_values(df['close'].values)
+
+        df = df.drop(['close','daily_pct_change'], axis = 1)
+
+        return df.columns.values, df.values       
+
+    def _load_data(self):
+        if self.only_random_walk:
+            return self._load_only_random_walk()
+        else:
+            return self._load_random_walk_w_prev_values()
 
     def _set_original_close_values(self, original_close):
         self.original_close = original_close

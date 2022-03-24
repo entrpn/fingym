@@ -50,13 +50,13 @@ except:
     iex_exc_info = sys.exc_info()
     pass
 
-def make(envName, stock_symbol = None, alphavantage_key = None, no_days_to_random_walk=222, iex_token = None, iex_start = None, iex_end = None):
+def make(envName, stock_symbol = None, alphavantage_key = None, no_days_to_random_walk=222, only_random_walk=False, iex_token = None, iex_start = None, iex_end = None):
     if envName == 'SPY-Daily-v0':
         return DailySpyEnv()
     if envName == 'SPY-Minute-v0':
         return IntradaySpyEnv()
     if envName == 'SPY-Daily-Random-Walk':
-        return SpyDailyRandomWalkEnv(no_days_to_random_walk)
+        return SpyDailyRandomWalkEnv(no_days_to_random_walk,only_random_walk)
     if envName == 'TSLA-Daily-v0':
         return TslaDailyEnv()
     if envName == 'TSLA-Daily-Random-Walk':

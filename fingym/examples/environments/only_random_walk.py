@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 plt.figure(figsize=(20,10))
 
 if __name__ == '__main__':
-  env = fingym.make('SPY-Daily-Random-Walk')
+  env = fingym.make('SPY-Daily-Random-Walk',only_random_walk=True)
 
   random_walks = []
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
   for random_walk in random_walks:
     plt.plot(time, random_walk, ls = '--')
 
-  plt.plot(time, real_close, label = 'Actual',linewidth=4.0)
+  #plt.plot(time, real_close, label = 'Actual',linewidth=4.0)
   plt.title('Geometric Brownian Motion - SPY')
   plt.legend(loc = 'upper left')
-  plt.savefig("random_walk.png")
+  plt.savefig("only_random_walk.png")

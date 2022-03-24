@@ -30,25 +30,19 @@ CONFIG = {
     'time_frame': 30,
     'sigma': 0.1,
     'learning_rate': 0.03,
-    'population_size': 20,
+    'population_size': 200,
     'iterations': 50,
     'train': True,
     'eval': True,
     'log_actions': False
 }
 # removing time frame, stocks owned and cash in hand
-env = fingym.make(CONFIG["env_name"])
-CONFIG["state_size"] = env.state_dim -3
+env = fingym.make(CONFIG["env_name"],only_random_walk=True)
+CONFIG["state_size"] = env.state_dim - 3
 
 def get_state_as_change_percentage(state, next_state):
-    print(state)
-    print(next_state)
-    opn = (next_state[2] - state[2]) / next_state[2]
-    high = (next_state[3] - state[3]) / next_state[3]
-    low = (next_state[4] - state[4]) / next_state[4]
-    close = (next_state[5] - state[5]) / next_state[5]
-    volume = (next_state[6] - state[6]) / next_state[6]
-    return [opn, high, low, close, volume]
+    close = (next_state[2] - state[2]) / next_state[2]
+    return close
 
 @ray.remote
 def reward_function(weights):
@@ -62,8 +56,11 @@ def reward_function(weights):
     return reward
     
 
-def run_agent(agent):
-    env = fingym.make(CONFIG['env_name'])
+def run_agent(agent,eval=False):
+    if eval:
+        env = fingym.make(CONFIG['env_name'],no_days_to_random_walk=1, only_random_walk=True)
+    else:
+        env = fingym.make(CONFIG['env_name'],only_random_walk=True)
     log_actions = CONFIG['log_actions']
     state = env.reset()
     # Removed time element from state
@@ -82,7 +79,7 @@ def run_agent(agent):
 
     i = 0
     while not done:
-        closes.append(state[5])
+        closes.append(state[2])
         action = agent.act(state_as_percentages)
         #if log_actions:
             #print('action: ',action)
@@ -207,7 +204,6 @@ if __name__ == '__main__':
 
     time_frame = CONFIG['time_frame']
     state_size = CONFIG['state_size']
-    
     model = Model(time_frame * state_size, 500, 3)
 
     dirname = os.path.dirname(__file__)
