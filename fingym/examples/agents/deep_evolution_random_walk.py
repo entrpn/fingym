@@ -22,19 +22,21 @@ import ray
 
 import os
 
-ray.init()
+ray.init(num_cpus=1)
 
 CONFIG = {
-    'env_name': 'SPY-Daily-Random-Walk',#'SPY-Daily-Random-Walk',
+    'env_name': 'SPY-Daily-Random-Walk',
     'max_shares_to_trade_at_once': 100,
-    'time_frame': 30,
+    'time_frame': 20,
     'sigma': 0.1,
     'learning_rate': 0.03,
     'population_size': 200,
     'iterations': 50,
     'train': True,
     'eval': True,
-    'log_actions': False
+    'log_actions': False,
+    'layer_size' : 512,
+    'layers' : 5
 }
 # removing time frame, stocks owned and cash in hand
 env = fingym.make(CONFIG["env_name"],only_random_walk=True)
@@ -48,7 +50,8 @@ def get_state_as_change_percentage(state, next_state):
 def reward_function(weights):
     time_frame = CONFIG['time_frame']
     state_size = CONFIG['state_size']
-    model = Model(time_frame * state_size, 500, 3)
+    layer_size = CONFIG['layer_size']
+    model = Model(time_frame * state_size, layer_size, 3)
     model.set_weights(weights)
     agent = Agent(model,state_size, time_frame)
     _,_,_,reward = run_agent(agent)
@@ -58,7 +61,7 @@ def reward_function(weights):
 
 def run_agent(agent,eval=False):
     if eval:
-        env = fingym.make(CONFIG['env_name'],no_days_to_random_walk=1, only_random_walk=True)
+        env = fingym.make(CONFIG['env_name'],no_days_to_random_walk=1, only_random_walk=False)
     else:
         env = fingym.make(CONFIG['env_name'],only_random_walk=True)
     log_actions = CONFIG['log_actions']
@@ -118,7 +121,8 @@ class Deep_Evolution_Strategy:
     def _get_weight_from_population(self,weights, population):
         weights_population = []
         for index, i in enumerate(population):
-            jittered = self.sigma * i
+            N = np.random.randn(i.shape[0],i.shape[1])
+            jittered = self.sigma * N
             weights_population.append(weights[index] + jittered)
         return weights_population
     
@@ -128,23 +132,25 @@ class Deep_Evolution_Strategy:
     def train(self,epoch = 500, print_every=1):
         for i in range(epoch):
             population = []
-            rewards = np.zeros(self.population_size)
-            for k in range(self.population_size):
+            for _ in range(self.population_size):
                 x = []
                 for w in self.weights:
                     x.append(np.random.randn(*w.shape))
                 population.append(x)
-            
             futures = [reward_function.remote(self._get_weight_from_population(self.weights,population[k])) for k in range(self.population_size)]
 
             rewards = ray.get(futures)
             
-            rewards = (rewards - np.mean(rewards)) / np.std(rewards)
+            # if std is 0 which can happen when model is starting out, add a small number
+            rewards = (rewards - np.mean(rewards)) / (np.std(rewards) + 0.0001)
+            #print("rewards after normalization: ",rewards)
+            
             for index, w in enumerate(self.weights):
                 A = np.array([p[index] for p in population])
                 self.weights[index] = (
                     w + self.learning_rate / (self.population_size * self.sigma) * np.dot(A.T, rewards).T
                 )
+                #print("weights:",self.weights)
             
             if (i + 1) % print_every == 0:
                 print('iter: {}. standard reward: {}'.format(i+1,ray.get(reward_function.remote((self.weights)))))
@@ -166,10 +172,10 @@ class Agent:
         
         state = np.array(list(self.state_fifo))
         state = np.reshape(state,(self.state_size*self.time_frame,1))
-        #print(state)
+        #print("state:",state)
         decision, buy = self.model.predict(state.T)
-        # print('decision: ', decision)
-        # print('buy: ', buy)
+        #print('decision: ', decision)
+        #print('buy: ', buy)
 
         return [np.argmax(decision[0]), min(self.max_shares_to_trade_at_once,max(int(buy[0]),0))]
     
@@ -178,17 +184,27 @@ class Agent:
 
 class Model:
     def __init__(self, input_size, layer_size, output_size):
-        self.weights = [
-            np.random.randn(input_size, layer_size),
-            np.random.randn(layer_size, output_size),
-            np.random.randn(layer_size, 1),
-            np.random.randn(1, layer_size)
-        ]
-    
+        self.weights = []
+        self.layers = CONFIG["layers"]
+        for i in range(self.layers):
+            if i == 0:
+                self.weights.append(np.random.rand(input_size, layer_size))
+                self.weights.append(np.random.rand(1,layer_size))
+            else:
+                self.weights.append(np.random.rand(layer_size, layer_size))
+                self.weights.append(np.random.rand(1,layer_size))
+        self.weights.append(np.random.randn(layer_size, output_size))
+        self.weights.append(np.random.randn(layer_size, 1))
+        self.weights.append(np.random.randn(1, layer_size))
+
     def predict(self, inputs):
-        feed = np.dot(inputs, self.weights[0]) + self.weights[-1]
-        decision = np.dot(feed, self.weights[1])
-        buy = np.dot(feed, self.weights[2])
+        for i in range(0,self.layers,2):
+            #print("i:",i)
+            #feed = np.dot(inputs, self.weights[0]) + self.weights[-1]
+            feed = np.dot(inputs, self.weights[i]) + self.weights[i+1]
+            inputs = feed
+        decision = np.dot(feed,self.weights[self.layers*2])
+        buy = np.dot(feed,self.weights[self.layers*2+1])
         return decision, buy
     
     def get_weights(self):
@@ -204,7 +220,7 @@ if __name__ == '__main__':
 
     time_frame = CONFIG['time_frame']
     state_size = CONFIG['state_size']
-    model = Model(time_frame * state_size, 500, 3)
+    model = Model(time_frame * state_size, CONFIG['layer_size'], 3)
 
     dirname = os.path.dirname(__file__)
     weights_file = os.path.join(dirname,'deep_evo_weights.npy')
@@ -222,7 +238,7 @@ if __name__ == '__main__':
         np.save(weights_file, agent.des.get_weights())
     
     if CONFIG['eval']:
-        closes, states_buy, states_sell, result = run_agent(agent)
+        closes, states_buy, states_sell, result = run_agent(agent,eval=True)
         print('result: {}'.format(str(result)))
         plt.figure(figsize = (20, 10))
         plt.plot(closes, label = 'true close', c = 'g')

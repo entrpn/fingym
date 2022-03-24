@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
   random_walks = []
 
-  for _ in range(100):
+  for _ in range(2):
     real_close = np.zeros(env.n_step)
     random_walk = np.zeros(env.n_step)
 

@@ -16,7 +16,7 @@ import os
 import pandas as pd
 import numpy as np
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 from fingym.envs.env import Env
@@ -166,7 +166,7 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
 
         super().__init__()
 
-        self._close_idx = 1
+        self._close_idx = 0
         self._open_idx = self._close_idx
     
     def step(self, action):
@@ -215,19 +215,26 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
         mu = df['daily_pct_change'].mean()
         sigma = df['daily_pct_change'].std()
 
-        today = df['close'].values[-1]
-        df['sim'] = df['close']
-        #df_len = df.shape[0]
-        for days in range(self.no_days_to_random_walk):
-            next_day = self._get_geometric_brownian_motion(today, mu, sigma)
-            df["sim"][days] = next_day
-            today = next_day
+        close = df['close'].values[-1]
+        retval = pd.DataFrame(columns = ['close','daily_pct_change'])
+        
+        last_row = df.iloc[-1]
+        retval = retval.append({'close' : last_row['close'], 'daily_pct_change' : last_row['daily_pct_change']}, ignore_index=True)
+        for _ in range(self.no_days_to_random_walk):
+            next_close = self._get_geometric_brownian_motion(close, mu, sigma)
+            close = next_close
+            retval = retval.append({'close' : next_close, 'daily_pct_change' : 0}, ignore_index=True)
 
+        retval['daily_pct_change'] = retval['close'].pct_change()
+        #drop first
+        retval = retval[1:]
+        
         self._set_original_close_values(df['close'].values)
 
         df = df.drop(['close','daily_pct_change'], axis = 1)
+        #print(df.head())
 
-        return df.columns.values, df.values       
+        return retval.columns.values, retval.values       
 
     def _load_data(self):
         if self.only_random_walk:
@@ -244,14 +251,15 @@ class SpyDailyRandomWalkEnv(DailySpyEnv):
     def _get_obs(self):
         """
         Return array with number stock owned, stock price and cash in hand.
-        Ex: [stock_owned, cash_in_hand, date, hclo, volume]
+        Ex: [stock_owned, cash_in_hand, close, daily_pct_change]
         """
         obs = np.empty(self.state_dim)
         obs[0] = self.stock_owned
         obs[1] = self.cash_in_hand
-        # date
-        obs[2] = self._convert_date_str_to_datetime(self.data[self.cur_step][0]).timestamp()
-        obs[3] = self.data[self.cur_step][-1]
+        # daily_pct_change
+        obs[2] = self.data[self.cur_step][-1]
+        # close
+        obs[3] = self.data[self.cur_step][-2]
         return obs
 
 class IntradaySpyEnv(SpyEnv):
