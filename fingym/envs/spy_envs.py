@@ -22,6 +22,8 @@ import re
 from fingym.envs.env import Env
 from fingym.spaces.space import BuyHoldSellSpace
 
+import random
+
 class SpyEnv(Env):
     def __init__(self):
 
@@ -33,6 +35,9 @@ class SpyEnv(Env):
         self._close_idx = 4
         self._open_idx = 1
         self.stock_owned = 0
+
+        self.buy_hold_num_shares = 0
+        self.buy_hold_reward = 0
 
         # stock_owned, cash_in_hand, date, hclo, volume
         self.state_dim = 2 + len(self.headers)
@@ -50,10 +55,21 @@ class SpyEnv(Env):
         self.cur_step = 0
         self.cash_in_hand = self.initial_investment
         self.stock_owned = 0
+
+        # these values help calculate reward against buy/hold strategy
+        self.buy_hold_num_shares = 0
+        self.buy_hold_reward = 0
+
         return self._get_obs()
 
     def step(self, action):
         
+        # mimic buy/hold strategy for getting final reward
+        if self.cur_step == 0:
+            stock_price = self._get_stock_price_open()
+            self.buy_hold_num_shares = round(self.cash_in_hand/stock_price)
+
+
         prev_val = self._get_val()
         if self.cur_step < self.n_step -1:
             self.cur_step += 1
@@ -68,6 +84,8 @@ class SpyEnv(Env):
         obs = self._get_obs()
         done = self.cur_step >= self.n_step - 1
         info = {'cur_val': cur_val}
+        if done:
+            self.buy_hold_reward = self.buy_hold_num_shares * self._get_stock_price_open()
 
 
         return obs, reward, done, info
@@ -83,7 +101,7 @@ class SpyEnv(Env):
         shares_to_sell = 0
         if action[0] == 2:
             shares_to_sell = action[1]
-        
+
         # buy
         shares_to_buy = 0
         if action[0] ==1:
@@ -109,6 +127,10 @@ class SpyEnv(Env):
                     self.cash_in_hand -= stock_price
                 else:
                     can_buy = False
+        
+        #penalize if it makes no action to buy/sell or 0 shares
+        if action[0] == 0 or action[1] == 0:
+            self.cash_in_hand-=random.randint(10,100)
 
     
     def _get_obs(self):

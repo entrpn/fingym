@@ -22,24 +22,25 @@ import ray
 
 import os
 
-ray.init(num_cpus=1)
+ray.init()#(num_cpus=5)
 
 CONFIG = {
     'env_name': 'SPY-Daily-Random-Walk',
     'max_shares_to_trade_at_once': 100,
-    'time_frame': 20,
+    'time_frame': 10,
     'sigma': 0.1,
-    'learning_rate': 0.03,
-    'population_size': 200,
-    'iterations': 50,
+    'learning_rate': 0.01,
+    'population_size': 250,
+    'iterations': 5,
     'train': True,
     'eval': True,
     'log_actions': False,
     'layer_size' : 512,
-    'layers' : 5
+    'layers' : 3,
+    'days_to_random_walk' : 512
 }
 # removing time frame, stocks owned and cash in hand
-env = fingym.make(CONFIG["env_name"],only_random_walk=True)
+env = fingym.make(CONFIG["env_name"],only_random_walk=True,no_days_to_random_walk=CONFIG['days_to_random_walk'])
 CONFIG["state_size"] = env.state_dim - 3
 
 def get_state_as_change_percentage(state, next_state):
@@ -55,15 +56,15 @@ def reward_function(weights):
     model.set_weights(weights)
     agent = Agent(model,state_size, time_frame)
     _,_,_,reward = run_agent(agent)
-    print('reward: ',reward)
+    #print('reward: ',reward)
     return reward
     
 
 def run_agent(agent,eval=False):
     if eval:
-        env = fingym.make(CONFIG['env_name'],no_days_to_random_walk=1, only_random_walk=False)
+        env = fingym.make(CONFIG['env_name'], only_random_walk=True,no_days_to_random_walk=CONFIG['days_to_random_walk'])
     else:
-        env = fingym.make(CONFIG['env_name'],only_random_walk=True)
+        env = fingym.make(CONFIG['env_name'],only_random_walk=True,no_days_to_random_walk=CONFIG['days_to_random_walk'])
     log_actions = CONFIG['log_actions']
     state = env.reset()
     # Removed time element from state
@@ -109,7 +110,10 @@ def run_agent(agent,eval=False):
         state_as_percentages = get_state_as_change_percentage(state, next_state)
         state = next_state
         i+=1
-    return closes, states_buy, states_sell, info['cur_val']
+
+        final_reward = env.buy_hold_reward - info['cur_val']
+
+    return closes, states_buy, states_sell, final_reward#info['cur_val']
 
 class Deep_Evolution_Strategy:
     def __init__(self, weights):
@@ -121,6 +125,7 @@ class Deep_Evolution_Strategy:
     def _get_weight_from_population(self,weights, population):
         weights_population = []
         for index, i in enumerate(population):
+            
             N = np.random.randn(i.shape[0],i.shape[1])
             jittered = self.sigma * N
             weights_population.append(weights[index] + jittered)
@@ -233,7 +238,7 @@ if __name__ == '__main__':
     # np.save(weights_file,model.get_weights())
     agent = Agent(model,state_size, time_frame)
     if CONFIG['train']:
-        agent.fit(iterations=CONFIG['iterations'], checkpoint=10)
+        agent.fit(iterations=CONFIG['iterations'], checkpoint=1)
         agent.model.set_weights(agent.des.get_weights())
         np.save(weights_file, agent.des.get_weights())
     

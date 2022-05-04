@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
   random_walks = []
 
-  for _ in range(2):
+  for _ in range(5):
     real_close = np.zeros(env.n_step)
     random_walk = np.zeros(env.n_step)
 
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         break
 
     random_walks.append(random_walk)
+    print(env.buy_hold_reward)
 
 
   time = np.linspace(1, len(random_walk), len(random_walk))
